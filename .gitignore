@@ -1,0 +1,21 @@
+# Secrets
+.env
+.env.*
+
+# Local Claude settings
+.claude/settings.local.json
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local plan/progress folders from /mynrd-plan and /mynrd-dispatch (not committed)
+.work/
