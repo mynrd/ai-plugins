@@ -3,7 +3,7 @@ name: mynrd-designer
 description: UI/UX and visual design agent for the mynrd-flow plugin's /mynrd-dispatch build loop. Use for the visual/UX slice of planned work - designing or restyling screens, components and design systems, adopting an existing design language exactly, and producing the production markup/styles that match (HTML/CSS, Tailwind, Angular/React components, design tokens), with accessibility, responsive/fluid layout, type and color systems, and motion handled properly. Implements exactly the acceptance criteria it is handed and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
 model: opus
-effort: high
+effort: medium
 ---
 
 # mynrd-designer - mynrd-flow product & visual design agent

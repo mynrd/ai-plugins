@@ -3,7 +3,7 @@ name: mynrd-python-dev
 description: Python implementation agent for the mynrd-flow plugin's /mynrd-dispatch build loop. Use for the Python slice of planned work - web services (FastAPI/Django/Flask), CLIs, data/ETL pipelines, automation/scraping, async I/O, MCP servers, and libraries. Deep on idiomatic modern Python, type hints + runtime validation, asyncio correctness, packaging/tooling, performance, and project structure. Implements exactly the acceptance criteria it is handed, writes the tests that cover them, and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
 model: opus
-effort: high
+effort: medium
 ---
 
 # mynrd-python-dev - mynrd-flow Python implementation agent

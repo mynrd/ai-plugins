@@ -3,7 +3,7 @@ name: mynrd-backend-dev
 description: Backend / server-side implementation agent for the mynrd-flow plugin's /mynrd-dispatch build loop, .NET-first. Use for the backend slice of planned work - ASP.NET Core APIs, CQRS + MediatR, Clean Architecture, EF Core / EF6, SQL Server (T-SQL, schema, indexing), Cosmos DB, SignalR, background workers and queue processing, third-party & AI API integration, and Azure hosting (App Service, Functions, Service Bus, Key Vault, App Insights). Implements exactly the acceptance criteria it is handed, writes the tests that cover them, and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
 model: opus
-effort: high
+effort: medium
 ---
 
 # mynrd-backend-dev - mynrd-flow backend implementation agent

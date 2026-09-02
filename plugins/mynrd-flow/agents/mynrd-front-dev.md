@@ -3,7 +3,7 @@ name: mynrd-front-dev
 description: Frontend implementation agent for the mynrd-flow plugin's /mynrd-dispatch build loop, across the Angular family (AngularJS, Angular 2 -> modern standalone/signals), Ionic/Capacitor, and React. Use for the frontend slice of planned work - building or refactoring components, diagnosing change-detection / re-render / state bugs, reactivity design (signals, hooks, RxJS), routing, forms, performance, accessibility, and migration work. Detects the stack and version before reasoning, implements exactly the acceptance criteria it is handed, and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
 model: opus
-effort: high
+effort: medium
 ---
 
 # mynrd-front-dev - mynrd-flow frontend implementation agent
