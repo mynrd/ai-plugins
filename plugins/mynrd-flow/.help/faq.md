@@ -6,16 +6,13 @@ Anticipated questions from real-world use. Grouped by theme.
 
 ## Choosing the right command
 
-### "Do I start with `/mynrd-intake` or `/mynrd-plan`?"
+### "Where do I start?"
 
-- `/mynrd-intake` - when something **just came in** (a request, a bug report, your own observation) and you want it triaged first: a brief, a check for existing work in `.work/`, a route. It also creates `progress.json`, which the rest of the workflow uses.
-- `/mynrd-plan` - when you **already know it's new work** and don't need the triage. Run it cold; it creates the `.work/` folder itself and marks the `intake` step `skipped`.
-
-Either way you end up in the same place: a `PLAN.md` that `/mynrd-dispatch` can build.
+`/mynrd-plan`, always. Paste the request, the bug report, or describe what you noticed. It checks `.work/` for existing work on it, discusses it, and writes the `PLAN.md` and `progress.json` that `/mynrd-dispatch` builds from.
 
 ### "When do I use `/mynrd-refine`?"
 
-When you've been **brainstorming with Claude in this session** and want a structured draft to review before deciding what to do. Produces a formatted Story / Task / Bug draft - no files written. Useful as a checkpoint before `/mynrd-plan`.
+When you've been **brainstorming with Claude in this session** and want a structured draft to review before deciding what to do. Produces a formatted draft (Description + AC, or Repro Steps + AC for a bug) - no files written unless you ask. Useful as a checkpoint before `/mynrd-plan`.
 
 ### "What's the difference between `/mynrd-refine` and `/mynrd-plan`?"
 
@@ -27,21 +24,16 @@ When you've been **brainstorming with Claude in this session** and want a struct
 
 ### "Something urgent came in. How do I capture and build it today?"
 
-Three commands, in sequence:
+Two commands, in sequence:
 
-1. `/mynrd-intake <paste the request>` → brief + `progress.json`, routes you to planning
-2. `/mynrd-plan` → discuss, write `PLAN.md` with AC and `## Testing`
-3. `/mynrd-dispatch` → the build loop runs to completion and reports once
+1. `/mynrd-plan <paste the request>` → discuss, write `PLAN.md` with AC and `## Testing`
+2. `/mynrd-dispatch` → the build loop runs to completion and reports once
 
 Then verify the change yourself and push. See [workflow.md](workflow.md).
 
 ### "I asked it to just build the thing and it refused"
 
-Working as designed. After intake, nothing builds until a `PLAN.md` with acceptance criteria exists - the brief has no definition of done. Run `/mynrd-plan`; it takes a few minutes and the build loop needs its output anyway. See [workflow.md](workflow.md) § "Intake enforces the sequence".
-
-### "Can I run `/mynrd-dispatch` without intake?"
-
-Yes - but not without a plan. `/mynrd-plan` run cold creates the `.work/` folder, `PLAN.md`, and `progress.json`; `/mynrd-dispatch` picks it up from there. What you can't skip is the plan itself: dispatch refuses to run without `PLAN.md` and a non-empty `acceptanceCriteria[]`.
+Working as designed. Nothing builds until a `PLAN.md` with acceptance criteria exists - a discussion has no definition of done. Run `/mynrd-plan`; it takes a few minutes and the build loop needs its output anyway. See [workflow.md](workflow.md) § "Nothing builds without a plan".
 
 ### "A dispatch run got interrupted. Do I start over?"
 
@@ -56,14 +48,14 @@ Read the report (and `runs[]` in `progress.json`) - it names the failure and wha
 Verify it yourself first (exercise the change, review the commits, push), then:
 
 ```
-/mynrd-verified .work/<slug> <optional one-line note of what you checked>
+/mynrd-verified <slug> <optional one-line note of what you checked>
 ```
 
 It closes the `human-verification` step and sets `status: verified` in `progress.json`. Without it the file sits at `human-verification: in_progress` forever - no other command writes that closing stamp. Run with no argument, it lists the folders awaiting verification and asks which.
 
 ### "I want to shelve this for now"
 
-Pick **park it** at intake's routing question. The folder keeps the brief as `BRIEF.md` and `status: "parked"`. Nothing picks it back up automatically - run `/mynrd-plan` on it when you're ready.
+Don't plan it. Nothing needs to be written for work you're not starting. If you've already got a `.work/` folder for it, leave it at `planned`; `/mynrd-dispatch` only picks up folders you point it at or that have an unfinished build.
 
 ### "Can I plan multiple pieces of work in one `/mynrd-plan` invocation?"
 

@@ -16,9 +16,9 @@ The last write of the workflow. `/mynrd-dispatch` ends with *"Development is don
 | Given | Meaning |
 | --- | --- |
 | *(empty)* | Find the candidates and ask which (below). |
-| `<slug>` | Use `.work/<slug>/`. |
+| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `PROGRESS-SCHEMA.md` § Folder. |
 | a path to a `.work/` folder | Use that folder. |
-| path or slug, then free text | The folder as above; everything after it is the **note** — one line on what was checked, stored verbatim. Example: `/mynrd-verified .work/e2e-standard ran the playwright suite against a real seed, commits squashed and pushed`. |
+| path or slug, then free text | The folder as above; everything after it is the **note** — one line on what was checked, stored verbatim. Example: `/mynrd-verified e2e-standard ran the playwright suite against a real seed, commits squashed and pushed`. |
 
 **No argument:** scan `.work/*/progress.json` for folders where `workflow[human-verification]` is `in_progress` (the awaiting-verification state).
 
@@ -30,7 +30,7 @@ The last write of the workflow. `/mynrd-dispatch` ends with *"Development is don
 
 ## Step 1 — Load and gate
 
-Open `<folder>/progress.json`. Missing file → say the workflow never started here and stop.
+Open `<folder>/progress.json`. Missing file → say the workflow never started here (`/mynrd-plan` creates it) and stop.
 
 Then exactly one of these paths:
 
@@ -39,7 +39,7 @@ Then exactly one of these paths:
 | `workflow[human-verification]` is `in_progress` (and `humanVerification.unlocked` is `true`) | Proceed to Step 2. |
 | `workflow[human-verification]` is already `done` | Say so — when it was verified, the note if one exists — and stop. Nothing to write. |
 | `workflow[build]` is `skipped` (edits driven by hand, dispatch never ran, so unlock never happened) | Confirm once: *"Build was skipped — mark this verified anyway?"* On yes, proceed to Step 2; this path also stamps the step's `startedAt` (same timestamp as `endedAt`), since nothing else ever did. |
-| Anything else — build `in_progress`, `blocked`, or `pending`; work `parked` | Refuse. Name exactly what's holding it: the blocked ACs, the unfinished build, the missing plan. Point at the command that resolves it (`/mynrd-dispatch`, `/mynrd-plan`). The gate is `/mynrd-dispatch`'s Step 8, and this command never reproduces its checks or overrides its verdict. |
+| Anything else — build `in_progress`, `blocked`, or `pending` | Refuse. Name exactly what's holding it: the blocked ACs, the unfinished build, the missing plan. Point at the command that resolves it (`/mynrd-dispatch`, `/mynrd-plan`). The gate is `/mynrd-dispatch`'s Step 8, and this command never reproduces its checks or overrides its verdict. |
 
 **Never work around the gate.** Not by setting `humanVerification.unlocked` yourself, not by "the tests look green so it's fine". A refusal here means the build isn't finished, and the fix is finishing it.
 
@@ -66,7 +66,7 @@ Three or four lines, then stop:
 ```text
 Verified — <title> is closed.
 
-  State:  .work/<slug>/progress.json  (status: verified)
+  State:  .work/<YYYY-MM-DD>-<slug>/progress.json  (status: verified)
   Note:   <the note, or "none">
 ```
 

@@ -16,15 +16,15 @@ A `progress.json` exists but `/mynrd-plan` never filled it in - usually the plan
 
 ### `/mynrd-dispatch` stops: "no progress.json"
 
-The loop **never creates** that file - `/mynrd-intake` does (or `/mynrd-plan` run cold). If you're pointing dispatch at a bare folder or a stray `.md`, start the workflow properly first.
+The loop **never creates** that file - `/mynrd-plan` does, beside `PLAN.md`. If you're pointing dispatch at a bare folder or a stray `.md`, run `/mynrd-plan` first.
 
 ### "I said 'just build it' and it declined"
 
-Sequence enforcement, working as designed. After intake, nothing builds until `workflow[plan]` is `done` and `acceptanceCriteria[]` is non-empty. See [workflow.md](workflow.md) § "Intake enforces the sequence". Run `/mynrd-plan` and then re-ask.
+Sequence enforcement, working as designed. Nothing builds until `workflow[plan]` is `done` and `acceptanceCriteria[]` is non-empty. See [workflow.md](workflow.md) § "Nothing builds without a plan". Finish `/mynrd-plan` and then run `/mynrd-dispatch`.
 
 ### "Dispatch can't find which work to build"
 
-With no arg it looks for the one `.work/` folder with unfinished build state. Zero candidates → nothing is mid-build (start with intake or plan). More than one → pass the folder path explicitly: `/mynrd-dispatch .work/<slug>/`.
+With no arg it looks for the one `.work/` folder with unfinished build state. Zero candidates → nothing is mid-build (run `/mynrd-plan`). More than one → pass the slug or folder explicitly: `/mynrd-dispatch <slug>` or `/mynrd-dispatch .work/<date>-<slug>/`.
 
 ---
 
@@ -70,13 +70,9 @@ The `.gitignore` entry is missing - the first command to write `.work/` is suppo
 
 Correct - `.work/` is gitignored, machine-local state. It never leaves the machine that did the work. To continue the work elsewhere, re-run `/mynrd-plan` there; the `runs[]` history from the other machine is gone and there's no way to recover it.
 
-### Intake found an existing `progress.json` and left it alone
+### Plan found an existing folder for my request
 
-Working as designed. Re-triaging existing work reports the state it found rather than clobbering it. If you genuinely want a clean start, delete the `.work/<slug>/` folder first.
-
-### Parked work never resumed
-
-Nothing resumes it automatically. Run `/mynrd-plan` on the folder (`/mynrd-plan .work/<slug>/`) when you're ready - the `BRIEF.md` is still there as input.
+Working as designed. `/mynrd-plan` scans `.work/` before starting new work and offers to re-plan the folder it found. Re-planning keeps the build state (AC matched by text, test links carried across). If you genuinely want a clean start, delete the `.work/<date>-<slug>/` folder first.
 
 ---
 
@@ -108,7 +104,7 @@ Both commands needed - the marketplace metadata and plugin payload are cached se
 
 ### "I want to abandon a run mid-flow"
 
-Just stop. The only persisted state is `.work/<slug>/` (resumable, harmless) and any commits the loop already made (yours to keep, squash, or drop - `git log` shows them, they were never pushed).
+Just stop. The only persisted state is `.work/<date>-<slug>/` (resumable, harmless) and any commits the loop already made (yours to keep, squash, or drop - `git log` shows them, they were never pushed).
 
 ### "The loop's commits aren't what I want"
 

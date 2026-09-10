@@ -1,15 +1,13 @@
 ---
 name: mynrd-plan
-description: Discuss a request and produce a local plan — PLAN.md and progress.json in a `.work/` folder. No tracker, no approval gate; everything stays on this machine.
+description: Discuss a request — a pasted chat blob, a bug report, your own observation — and produce a local plan: PLAN.md and progress.json in a `.work/` folder. The entry point of the workflow. No tracker, no approval gate; everything stays on this machine.
 ---
 
 # /mynrd-plan
 
-Discussion-first command. One flow: discuss a request — a chat ask, a bug report, your own observation — then write a plan into a `.work/` folder. Nothing is sent anywhere, so there is no approval gate.
+The front door and the planning step in one. Takes whatever came in — a pasted chat, a bug report, a "hey can we…", something you noticed — checks `.work/` for a folder that already covers it, discusses it until the gaps are closed, then writes a plan into a `.work/` folder. Nothing is sent anywhere, so there is no approval gate.
 
-**This command has no entry requirement.** Run it cold, any time, on anything — no `/mynrd-intake` first, no existing `.work/` folder. Planning a piece of work is a complete use of it on its own. Coming from intake only means Step 0.5 finds a `progress.json` already there and reads the route out of it.
-
-It is also the **only** command that writes `PLAN.md`, which is what `/mynrd-dispatch` builds from. Everything downstream depends on this command having run at least once.
+It is the **only** command that writes `PLAN.md` and the only command that creates `progress.json`. `/mynrd-dispatch` builds from those two files and refuses to run without them, so every piece of work starts here.
 
 ---
 
@@ -18,8 +16,10 @@ It is also the **only** command that writes `PLAN.md`, which is what `/mynrd-dis
 | `$ARGUMENTS` | Meaning |
 | --- | --- |
 | empty | New plan — Step 1 opens the discussion |
-| free text | New plan — the text is the topic; use it as the opening message and skip the intro |
+| free text | New plan — the text is the raw request; use it as the opening message and skip the intro |
 | a path to a `.work/` folder | **Re-plan** — load the existing `PLAN.md` and revise it in place |
+
+Never plan from a filename or a folder name alone. If the request references a file the user has on disk, ask for the path and read it.
 
 ---
 
@@ -29,74 +29,67 @@ Resolve the repo root this plan belongs to: `git rev-parse --show-toplevel`, fal
 
 ---
 
-## Step 0.5 — Open `progress.json`
+## Step 0.5 — Existing-work check
 
-Every run works against a `progress.json` in a `.work/` folder. Schema, folder naming, and status vocabularies are defined once in `commands/mynrd-intake.md` § "The `progress.json` file" — read that, don't restate it.
+Skip this step on a re-plan (the folder was given). Otherwise, before opening a discussion, look in `.work/` for a folder that already covers the request.
 
-**Entered from `/mynrd-intake`?** The file already exists and its `intake.route` tells you what to do:
+Pull the 3-6 most distinctive nouns/verbs from the request (feature names, error strings, screen names — not "fix", "issue", "user") and match them against the folder names under `.work/` and each folder's `progress.json` `title`. Match on different term combinations rather than one long clause. Don't read `PLAN.md` contents to match — titles are enough.
 
-| `intake.route` | Action |
-| --- | --- |
-| `plan` | Continue here |
-| `park` | The user parked it and came back — confirm they want to plan it now |
+- **Nothing found** — say `no .work/ folder mentions <terms>` in one line and continue. Don't pad with unrelated folders.
+- **Something plausible found** — show up to 5 as `<folder> · <status> · <title>`, one line each on why it might be the same thing, and ask once whether to re-plan that folder or start new. Re-plan → treat the rest of this run as if that folder were the argument.
 
-**`intake.findings[]` is planning input, not decoration.** When the file carries findings, read them before you ask anything: each one names a `path:line` that was already checked, so re-deriving it wastes a turn and asking the user about it wastes theirs. Open the discussion on what the findings *don't* settle. Verify one before you build an AC on it — a finding is what a past session read, not a guarantee the code still says it — and say so plainly if it no longer holds rather than silently planning around it. An empty or absent array is the normal case and means nothing was established, not that the code is fine.
+**Findings.** If this session already knows something about the code — a debugging thread, a stack trace the user pasted, a file you read before this command ran — keep it. One line each, ending in the `path:line` that proves it:
 
-**Invoked directly (intake skipped)?** Create the file yourself with `intake: null` and `workflow[intake] = skipped`, reason `"intake skipped — /mynrd-plan invoked directly"`, `endedAt` stamped now (a skipped step gets no `startedAt`). Folder name follows the same rule: `.work/<YYYY-MM-DD>-<slug>/`. Skipping intake is supported, not a mistake — don't nag about it.
+```text
+Findings:
+  BackgroundJobControlRegistry.ReportFailureAsync returns early when StopOnError is false — src/server/.../BackgroundJobControlRegistry.cs:88
+  background-job-list.component.ts:164 uses modal--sm (400px); modal--md already exists in src/styles.scss
+```
 
-Whichever way you got here, this is a local filesystem write: **no gate**.
+Don't go looking to fill this in — it exists to keep what the session already established, so the plan doesn't re-derive it. Nothing known yet means no block, which is the normal case. Anything you can't point at a file for is an open question for Step 2, not a finding. Findings go to `findings[]` in Step 4, and every one is verified once before an AC is built on it — a finding is what a past turn read, not a guarantee the code still says it.
 
 ---
 
 ## Step 1 — Usage guide
 
-Print this short intro the first time (skip it when `$ARGUMENTS` already carries the topic):
+Print this short intro the first time (skip it when `$ARGUMENTS` already carries the request):
 
 > **`/mynrd-plan`.** Tell me what needs planning. Could be:
 > - A request passed via chat
 > - A bug you hit
 > - Your own observation while working
 >
-> I'll ask a few questions to surface gaps, then we'll pick the shape of the draft (Story / Task / Bug) and write the plan together. Everything stays local — `PLAN.md` and `progress.json` in a `.work/` folder.
+> I'll ask a few questions to surface gaps, then write the plan. Everything stays local — `PLAN.md` and `progress.json` in a `.work/` folder.
 
 Wait for the user's opening message.
 
-**Re-planning?** (a `.work/` folder path was the argument, or the folder already holds a `PLAN.md`) — read the existing `PLAN.md` first and open the discussion on what's changing. `PLAN.md` is rewritten in place — no `PLAN-v2.md`.
+**Re-planning?** (a `.work/` folder path was the argument, or Step 0.5 picked one) — read the existing `PLAN.md` and `progress.json` first and open the discussion on what's changing. `PLAN.md` is rewritten in place — no `PLAN-v2.md`.
+
+---
 
 ## Step 2 — Discussion
 
-**Entered from `/mynrd-intake`?** Then the brief is your input — don't reprint it and don't re-ask what it already answers (What / Who-why / Signal / Urgency / Project). Open directly on its `Unknowns` row. Skip Step 1's intro entirely; the user has already seen the framing.
+Read the request. Restate it in one or two sentences so the user sees what you understood before either of you invests in discussion. Quote, don't paraphrase, any urgency signal ("'need this before Friday's demo'" is evidence; "high priority" is your interpretation).
 
-Read the user's input. Ask **at most 2 clarifying questions per turn**. Aim to surface:
+Then ask **at most 2 clarifying questions per turn**. Aim to surface:
 
 - **What's being asked for** in plain language
 - **Who needs it / why it matters** (the driver)
 - **Scope and out-of-scope** boundaries
 - **Acceptance criteria** — how done is judged
-- **Bug specifics** (if it's a bug): repro steps, actual vs expected, impact
+- **Bug specifics** (if it's a defect): repro steps, actual vs expected, impact
+
+Skip anything the request or the findings already answer. If the request is a question rather than a piece of work, say so and answer it — don't manufacture a plan. If it's real but not for now, say so and stop; not planning something is how it gets parked.
 
 Don't over-interview. If the user signals "draft it" / "let's write it" / "go ahead," stop asking and move to Step 3.
 
-## Step 3 — Pick the type
+---
 
-The type — Task / User Story / Bug — shapes the draft; it isn't sent anywhere. Ask **one question**. Call `AskUserQuestion`. Only a host missing the tool entirely falls back to a single plain-text message with the question and one reply.
+## Step 3 — Draft the content
 
-- `question`: `"What shape should this plan take?"`
-- `multiSelect`: `false`
-- `options`:
-  1. The type **you (the AI) recommend** as the first option, with label `<Type> (Recommended)` and a 1-line description summarizing the drafted content (e.g. `User Story (Recommended) — the export-PDF flow needs to handle multi-page invoices`). Pick the type based on signals in the discussion:
-     - User-facing capability / value → User Story
-     - Implementation step under existing work → Task
-     - Defect / unexpected behavior → Bug
-  2. The other two types as plain options without `(Recommended)`, each with a short hint of how it'd shape the draft.
+**The shape follows from the discussion; don't ask for it.** A defect (something that used to work or was expected to work and doesn't) gets the Bug format. Everything else — new capability, change to existing behavior, an implementation step — gets the Description format. Say which you're using in one line and move on.
 
-Wait for the selection. If they pick a type other than your recommendation, that's fine — go with their pick.
-
-## Step 4 — Draft the content
-
-Based on the chosen type, draft the plan content using the locked formats below.
-
-### Story / Task — Description (markdown)
+### Description (non-bug work)
 
 ```markdown
 ## Context
@@ -112,14 +105,7 @@ Based on the chosen type, draft the plan content using the locked formats below.
 [Other work, systems, or "None"]
 ```
 
-### Story / Task — Acceptance Criteria (markdown numbered list)
-
-```markdown
-1. [Specific, independently testable condition]
-2. [Next condition]
-```
-
-### Bug — Repro Steps (markdown)
+### Repro Steps (bug)
 
 ```markdown
 ## Steps to Reproduce
@@ -138,20 +124,42 @@ Based on the chosen type, draft the plan content using the locked formats below.
 [browser / config / production-only / etc.]
 ```
 
-### Bug — Acceptance Criteria
+### Acceptance Criteria (both)
 
-For Bugs, AC is typically the inverse of Expected Result. Keep the same markdown numbered-list format. May be omitted if Expected Result fully covers the fix criterion.
+```markdown
+1. [Specific, independently testable condition]
+2. [Next condition]
+```
 
-## Step 5 — Write
+For a bug, AC is typically the inverse of Expected Result. Keep the numbered list even if it has one entry — `/mynrd-dispatch` and every test case reference these ids.
+
+---
+
+## Step 4 — Write
 
 No preview, **no gate, no approval prompt of any kind** — neither `AskUserQuestion` nor a typed `Approve …` reply. There is nothing external to approve, and gating a local file write teaches nothing. Show what you wrote after the fact.
 
-1. **`PLAN.md`** per [The `.work` plan folder](#the-work-plan-folder), in `.work/<YYYY-MM-DD>-<slug>/`.
-2. **`progress.json`** in the same folder:
-   - `type`, `title`, `slug`, `plan` set. `status = "planned"`, `workflow[plan] = done` with its `startedAt` (when the planning discussion opened) and `endedAt` (now) — per `mynrd-intake.md` § "Every step records when it started and when it ended".
-   - `acceptanceCriteria[]` — one entry per AC in the drafted list, `{ "id": <n>, "text": "<AC text>", "status": "pending", "implementedIn": [] }`. Numbering matches the drafted AC list exactly; `/mynrd-dispatch` and every test case reference these ids.
-   - `tests.unit` / `.ui` — `enabled` and `command` from the plan's `## Testing` section. A tier the plan says `no` to gets `enabled: false` and a `reason`. Never leave `enabled: null` here; that's the marker for "nobody resolved this yet".
-3. **`.gitignore`** must cover `.work/` before either write — see the gitignore rule below.
+1. **`.gitignore`** must cover `.work/` before either write — see the gitignore rule below.
+2. **`PLAN.md`** per [The `.work` plan folder](#the-work-plan-folder), in `.work/<YYYY-MM-DD>-<slug>/`.
+3. **`progress.json`** in the same folder. Schema, folder naming, and status vocabularies are defined once in `PROGRESS-SCHEMA.md` at the plugin root — read that, don't restate it.
+
+### New plan
+
+Create the file. `id` is the folder name, `slug` its non-date part, `title` the plan's title, `plan` = `"PLAN.md"`, `status = "planned"`. `findings[]` from Step 0.5 (empty array when there were none). `workflow[]` is three steps: `plan` = `done` with `startedAt` (when the discussion opened) and `endedAt` (now); `build` and `human-verification` = `pending`.
+
+- `acceptanceCriteria[]` — one entry per AC in the drafted list, `{ "id": <n>, "text": "<AC text>", "status": "pending", "implementedIn": [] }`. Numbering matches the drafted AC list exactly. Add `"evidence": "live"` or `"review"` where an AC plainly can't have a unit test (a docs change, a config removal); default `test` needs no field.
+- `tests.unit` / `.ui` — `enabled` and `command` from the plan's `## Testing` section. A tier the plan says `no` to gets `enabled: false` and a `reason`. Never leave `enabled: null` here; that's the marker for "nobody resolved this yet".
+
+### Re-plan
+
+Rewrite `PLAN.md` in place, then reconcile `progress.json` without losing build state:
+
+- **AC are matched by text.** An existing AC whose text is unchanged (or trivially reworded — same condition) keeps its `status`, `implementedIn`, `evidence`, `verified`, and `task`. A new AC is `pending`. A removed AC is dropped, and every `tests.*.cases[].ac` entry that pointed at it is dropped too — say which, out loud. Then renumber `id` to match the new list and rewrite the `ac` references on cases and `tasks[]` to follow.
+- **Never touch** `tasks[].state`, `tasks[].commits[]`, task stamps, `runs[]`, `branch`, or the `human-verification` step. Those record what happened.
+- **If `workflow[build]` was `done` and the AC list changed** — added, removed, or reworded so a `pass` no longer holds — set `build` back to `pending` (drop its old stamps; a fresh run will stamp it), `humanVerification.unlocked = false`, `status = "planned"`, and say so. A green build against an old plan is not a green build against this one.
+- `workflow[plan]` gets a fresh `endedAt`; `slug`, `id`, `created` never change.
+
+### Report
 
 Report the paths and stop:
 
@@ -162,8 +170,10 @@ Planned locally.
   AC:       3 criteria, all pending
   Tests:    unit yes (pytest tests/pdf) · ui no
 
-Next: /mynrd-dispatch .work/2026-08-14-invoice-export-fails
+Next: cut a branch if you want one, then /mynrd-dispatch .work/2026-08-14-invoice-export-fails
 ```
+
+Stop here. **Don't continue into the build**, not with `/mynrd-dispatch`, not with a subagent, not by editing files yourself — dispatch edits source, runs tests, starts local processes, and commits, which shouldn't arrive as the tail of a planning turn. The user runs it.
 
 ---
 
@@ -177,9 +187,9 @@ The plan lives on disk; the local copy is what `/mynrd-dispatch` reads.
 .work/<YYYY-MM-DD>-<slug>/PLAN.md
 ```
 
-- `<slug>` — lowercased title, alphanumerics collapsed to single hyphens, trimmed, max 40 chars. Same rule used for branch names, so `.work/2026-08-14-pdf-export-pagebufferoverflow/` pairs with `bugfix/pdf-export-pagebufferoverflow`. Before a title exists, the slug comes from the intake brief's `What` line.
+- `<slug>` — lowercased title, non-alphanumerics collapsed to single hyphens, trimmed, max 40 chars. Same rule used for branch names, so `.work/2026-08-14-pdf-export-pagebufferoverflow/` pairs with `bugfix/pdf-export-pagebufferoverflow`. Set once at creation; a re-plan that changes the title does **not** rename the folder or the `slug` field.
 - One directory per unit of work. Re-planning rewrites `PLAN.md` in place; it does not create a second directory or a `PLAN-v2.md`.
-- `progress.json` lives beside `PLAN.md` in the same directory — see `commands/mynrd-intake.md` § "The `progress.json` file".
+- `progress.json` lives beside `PLAN.md` in the same directory — see `PROGRESS-SCHEMA.md`.
 - The directory is a container for this item's local working files, so anything else you drop in there is yours to manage. Only `PLAN.md` and `progress.json` are written and read by these commands.
 
 **Gitignore, every time.** Before writing the file, make sure the repo ignores the folder:
@@ -199,8 +209,6 @@ The plan lives on disk; the local copy is what `/mynrd-dispatch` reads.
 ```markdown
 # <title>
 
-**Type:** <Task|User Story|Bug>
-
 ## Context
 ## What needs to happen
 ## Out of scope
@@ -216,12 +224,22 @@ the file worth reading at build time.]
 - UI: <yes|no> — <framework, e.g. ng test>
 ```
 
-Skip sections that don't apply (a Bug uses Repro Steps / Actual / Expected instead of "What needs to happen"). Never leave `Implementation notes` empty — if the discussion produced none, write what you'd tell the next dev about where to start.
+Skip sections that don't apply (a bug uses Steps to Reproduce / Actual / Expected / Impact / Environment instead of "What needs to happen"). Never leave `Implementation notes` empty — if the discussion produced none, write what you'd tell the next dev about where to start.
 
 **The `Testing` section is what `/mynrd-dispatch` reads to decide which test tiers its build loop runs.** Fill it from the discussion and what the repo actually has — don't ask a question for it. Defaults: Unit `yes` for backend work, UI `yes` for frontend work. **Those two tiers are all there is** — don't add an `E2E:` row or name a browser suite here; `/mynrd-dispatch` runs neither.
 
 ---
 
+## What this command does not do
+
+- **No writes outside `.work/` and `.gitignore`.** No source files, no tracker, no network.
+- **No git operations.** Branching is yours to do by hand — `<type>/<slug>` when you want one.
+- **No build.** No source edits, no subagent dispatch, no tests — even when the user says "just build it". Point at `/mynrd-dispatch` once the plan is written.
+
+---
+
 ## Failure handling
 
-If any tool call or file write errors, show the error verbatim, don't retry automatically. Ask the user whether to fix and retry or abort.
+- **A `.work/` folder won't scan** (unreadable, or its `progress.json` doesn't parse): show the error, skip that folder, and say the existing-work check ran partial. Don't repair or overwrite the broken file from here.
+- **Re-plan lands on a `progress.json` that won't parse:** don't overwrite it — report the corruption, name the file, and stop. Hand-fixing the file beats losing its build state.
+- **Any other tool call or file write errors:** show the error verbatim, don't retry automatically. Ask the user whether to fix and retry or abort.

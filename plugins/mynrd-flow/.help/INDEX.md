@@ -13,8 +13,8 @@ This is the table of contents that `/mynrd-help` reads first. Every entry maps a
 | First-time orientation, install, "what is this", "where do I start" | [getting-started.md](getting-started.md) | The user is new and asks for a tour, how to install, or what to do first |
 | What a specific command does, its arguments, its behavior | [commands.md](commands.md) | The user asks about a specific `/mynrd-*` command or how to pick one |
 | The end-to-end sequence: which stage am I in, what comes next | [workflow.md](workflow.md) | The user asks how the flow fits together, what to do after a stage, or why a build was refused |
-| `.work/<slug>/`, `progress.json` - what it holds, who writes it, what the statuses mean | [progress.md](progress.md) | The user asks about the state file, `implemented` vs `pass`, where the build loop's state lives, or why a step says `skipped` |
-| Triaging something that just came in | [commands.md](commands.md) (`/mynrd-intake`) + [workflow.md](workflow.md) | The user asks where to start with a new request or what `/mynrd-intake` does |
+| `.work/<date>-<slug>/`, `progress.json` - what it holds, who writes it, what the statuses mean | [progress.md](progress.md) | The user asks about the state file, `implemented` vs `pass`, where the build loop's state lives, or why a step says `skipped` |
+| Starting on something that just came in | [commands.md](commands.md) (`/mynrd-plan`) + [workflow.md](workflow.md) | The user asks where to start with a new request |
 | The build loop, specialist agents, test tiers, blocked ACs | [commands.md](commands.md) (`/mynrd-dispatch`) + [progress.md](progress.md) | The user asks what `/mynrd-dispatch` runs, which agent handles what, or why an AC is blocked |
 | Common questions, "how do I X" | [faq.md](faq.md) | The user has a procedural question that isn't covered elsewhere |
 | Errors, refusals, what they mean, how to fix | [troubleshooting.md](troubleshooting.md) | The user hit an error or a refusal and wants to know what happened |

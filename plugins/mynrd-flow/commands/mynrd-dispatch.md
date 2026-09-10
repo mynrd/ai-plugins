@@ -44,8 +44,8 @@ The only full stop before the plan is finished is a **real blocker** — a decis
 
 | Given | Meaning |
 | --- | --- |
-| *(empty)* | Resolve the work folder: the slug in the branch (`feature/e2e-standard` → `.work/e2e-standard/`), else the single `.work/*/` folder whose `progress.json` has an unfinished `workflow[build]`. |
-| `<slug>` | Use `.work/<slug>/`. |
+| *(empty)* | Resolve the work folder: the slug in the branch (`feature/e2e-standard` → `.work/*-e2e-standard/`), else the single `.work/*/` folder whose `progress.json` has an unfinished `workflow[build]`. |
+| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `PROGRESS-SCHEMA.md` § Folder. |
 | a path to a `.work/` folder | Use that folder. |
 | a path ending in `.md` | Use that file as the plan, and the `progress.json` beside it. |
 
@@ -71,13 +71,13 @@ Extract: **Acceptance Criteria** (the exit condition), **Implementation notes** 
 
 State lives beside the plan, in the same folder: `<plan folder>/progress.json`. Single source of truth.
 
-**This command never creates it.** `/mynrd-intake` creates it, `/mynrd-plan` fills in the plan-side fields. Dispatch opens what's already there and owns the build-side fields only.
+**This command never creates it.** `/mynrd-plan` creates it alongside `PLAN.md`. Dispatch opens what's already there and owns the build-side fields only.
 
 **Missing?** Say exactly this and stop:
 
-> No `progress.json` in `<folder>`. It's created by `/mynrd-intake` and filled in by `/mynrd-plan` — run whichever you skipped.
+> No `progress.json` in `<folder>`. It's created by `/mynrd-plan` — run it.
 
-**Exists:** load it, report where things stand in three lines, and **resume from the first workflow step that is neither `done` nor `skipped`**. Don't redo finished work — it burns tokens and can undo hand edits made in between. A `blocked` build you're resuming goes back to `in_progress` with a fresh `startedAt` and its stale `endedAt` cleared (the timestamp rule in `mynrd-intake.md`).
+**Exists:** load it, report where things stand in three lines, and **resume from the first workflow step that is neither `done` nor `skipped`**. Don't redo finished work — it burns tokens and can undo hand edits made in between. A `blocked` build you're resuming goes back to `in_progress` with a fresh `startedAt` and its stale `endedAt` cleared (the timestamp rule in `PROGRESS-SCHEMA.md`).
 
 Two things to check before doing anything else:
 
@@ -88,7 +88,7 @@ Two things to check before doing anything else:
 
 ### Schema
 
-The full schema, folder rules, and status vocabularies are defined once, in `commands/mynrd-intake.md` § "The `progress.json` file". Don't restate them and don't diverge from them. The fields **this command owns** look like this mid-loop:
+The full schema, folder rules, and status vocabularies are defined once, in `PROGRESS-SCHEMA.md` at the plugin root. Don't restate them and don't diverge from them. The fields **this command owns** look like this mid-loop:
 
 ```json
 {
@@ -96,8 +96,6 @@ The full schema, folder rules, and status vocabularies are defined once, in `com
   "updated": "2026-08-14T15:42:00+08:00",
 
   "workflow": [
-    { "step": "intake",             "status": "done",
-      "startedAt": "2026-08-14T09:10:00+08:00", "endedAt": "2026-08-14T09:12:00+08:00" },
     { "step": "plan",               "status": "done",
       "startedAt": "2026-08-14T10:01:00+08:00", "endedAt": "2026-08-14T10:40:00+08:00" },
     { "step": "build",              "status": "in_progress",
@@ -159,15 +157,15 @@ The full schema, folder rules, and status vocabularies are defined once, in `com
 }
 ```
 
-**Leave everything else alone.** `intake`, `type`, `slug`, `plan`, `created`, and the `workflow` steps other commands own are read-only here — carry them through every rewrite untouched. Dropping a field because this command doesn't use it destroys another stage's state. `tasks[].slice` / `title` / `ac` belong to whoever wrote them; only `state`, `commits[]`, and the `startedAt` / `endedAt` stamps are yours.
+**Leave everything else alone.** `findings`, `slug`, `plan`, `created`, and the `workflow` steps other commands own are read-only here — carry them through every rewrite untouched. Dropping a field because this command doesn't use it destroys another stage's state. `tasks[].slice` / `title` / `ac` belong to whoever wrote them; only `state`, `commits[]`, and the `startedAt` / `endedAt` stamps are yours.
 
 **`implemented` and `pass` are different claims.** `implemented` = the code is written. `pass` = the AC's evidence exists and is green. Only Step 6 promotes an AC to `pass`.
 
-**Not every AC is provable by a test, and pretending otherwise strands finished work.** `acceptanceCriteria[].evidence` says which kind an AC takes — `test` (default), `live` (a check you ran against the running app), `review` (the change is the evidence: a docs sweep, a config removal, a command file that now exists). `live` and `review` require a `verified` string naming exactly what you ran or read. Full definition in `mynrd-intake.md` § "The `progress.json` file"; the promotion rules are Step 6.
+**Not every AC is provable by a test, and pretending otherwise strands finished work.** `acceptanceCriteria[].evidence` says which kind an AC takes — `test` (default), `live` (a check you ran against the running app), `review` (the change is the evidence: a docs sweep, a config removal, a command file that now exists). `live` and `review` require a `verified` string naming exactly what you ran or read. Full definition in `PROGRESS-SCHEMA.md`; the promotion rules are Step 6.
 
 ### Both tiers have one shape
 
-`unit` and `ui` are identical objects — full shape (`lastRun`, `reason`, per-case `durationMs` / `message`, the `truncated` marker for large suites) in `mynrd-intake.md` § "`tests` — the two tiers, one shape". The two rules the loop lives by:
+`unit` and `ui` are identical objects — full shape (`lastRun`, `reason`, per-case `durationMs` / `message`, the `truncated` marker for large suites) in `PROGRESS-SCHEMA.md` § "`tests` — the two tiers, one shape". The two rules the loop lives by:
 
 - **Tier `status` is derived, never hand-set:** `fail` if any case failed · `pass` if there's ≥1 case and none failed · `not_run` if `cases` is empty · `skipped` if the tier is disabled.
 - **The AC↔test link lives on the case only** (`ac: [1, 2]`). An AC's `pass` is computed from the cases pointing at it. One direction, so nothing drifts.
@@ -175,7 +173,7 @@ The full schema, folder rules, and status vocabularies are defined once, in `com
 ### Write rules
 
 - **Rewrite the whole file on every transition** — step or task started, agent dispatched, agent returned, tier run, round closed, step or task ended. It's small; a stale `updated` is worse than the write.
-- **Every start and end is stamped in the write that caused it.** `workflow[]` steps, `tasks[]`, and `runs[]` all carry `startedAt` / `endedAt` per `mynrd-intake.md` § "Every step records when it started and when it ended" — written at the moment of the transition, never back-filled at the end of the turn.
+- **Every start and end is stamped in the write that caused it.** `workflow[]` steps, `tasks[]`, and `runs[]` all carry `startedAt` / `endedAt` per `PROGRESS-SCHEMA.md` § "Every step records when it started and when it ended" — written at the moment of the transition, never back-filled at the end of the turn.
 - `updated` is local ISO-8601 with offset.
 - **Never write a status better than the evidence.** A tier is `pass` only if its command exited 0 in this session. An AC is `pass` only if a passing case names it. This file outlives the conversation — an optimistic status here is a lie with a long tail.
 - `.gitignore` must cover `.work/` before the first write (same rule as the plan folder, `commands/mynrd-plan.md` § "The `.work` plan folder").
@@ -366,7 +364,7 @@ Development is done — try it now.
     generate-e2e-command fcc72d6
     docs-sweep           0ff2691
     harness-lifecycle    09b71bf
-  State:   .work/e2e-standard/progress.json
+  State:   .work/2026-08-15-e2e-standard/progress.json
 
 What I built
 - Test-data host with seed/teardown + run ledger; swept on startup.
@@ -381,7 +379,7 @@ Worth your eyes
 
 Next: exercise it yourself — AI-green isn't verified. Review the commits
 and rework them however you like, then push when you're happy. When you're
-satisfied, /mynrd-verified .work/e2e-standard closes this out.
+satisfied, /mynrd-verified e2e-standard closes this out.
 ```
 
 **The commits block is mandatory whenever anything was committed** — the SHAs, the branch, and `not pushed`. They're yours to rewrite: the developer reads them and may squash, amend, or drop any of them, which is exactly why nothing was pushed and why the loop never rewrites its own history.

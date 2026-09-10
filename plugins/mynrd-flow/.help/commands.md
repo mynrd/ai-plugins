@@ -1,6 +1,6 @@
 # Command reference
 
-6 slash commands. Everything is local - no command talks to any external service.
+5 slash commands. Everything is local - no command talks to any external service.
 
 For each command:
 
@@ -11,53 +11,36 @@ For each command:
 
 ---
 
-## `/mynrd-intake`
-
-- **Arg:** `[raw text?]` - the request, pasted inline. With no arg it triages what you've already been discussing in the session.
-- **Writes files?** One - `.work/<slug>/progress.json` (and `.gitignore` gets a `.work/` entry if it lacks one).
-- **What it does:** The front door for anything that hasn't been triaged yet, and the command that starts the state file everything else uses.
-  1. **Brief** - restates the request as What / Who-why / Signal / Urgency / **Unknowns**, before asking you anything. Urgency quotes the actual words ("before Friday"), not an interpretation. When the session already knows something about the code (you were debugging, you pasted a stack trace), a **Findings** block keeps it - one line each, ending in the `path:line` that proves it, so `/mynrd-plan` doesn't re-derive it. Intake never goes looking to fill that in, and an empty block is the normal case.
-  2. **Existing-work check** - looks in `.work/` for a folder that already covers this, and for a `PLAN.md` in it. Says in one line what it found. That answer decides which routes you get offered.
-  3. **Route** - a pick. **Plan found:** build it (`/mynrd-dispatch`) or refine the plan (`/mynrd-plan`). **No plan:** plan it, refine it first, park it, or not actionable.
-  4. **`progress.json`** - writes `.work/<slug>/progress.json` holding the brief, any findings, the route you picked, and the `workflow[]` steps. Every later command reads and updates this file. See [progress.md](progress.md).
-- **Notes:**
-  - **Handing off to `/mynrd-plan` is the normal ending.** Intake decides *what this is*; `/mynrd-plan` decides *what gets built*. The plan route continues inline, carrying the brief so you don't retype it.
-  - **Running intake puts the work on rails.** For the rest of that session nothing builds until a plan exists. Ask it to "start the development" with no `PLAN.md` on disk and it declines and points you at `/mynrd-plan` - the brief has no acceptance criteria and no `## Testing` section, so there'd be no definition of done. See [workflow.md](workflow.md).
-  - **"Build it" only appears when a `PLAN.md` was found.** It stops and tells you to run `/mynrd-dispatch` - that command edits files, runs tests, and commits, which shouldn't arrive as the tail of a triage.
-  - **Park it** leaves the folder with `status: "parked"` and the brief as `BRIEF.md`. Nothing picks it back up automatically - re-run `/mynrd-plan` when you're ready.
-  - **Re-triaging existing work won't clobber its state.** If a `progress.json` is already there, intake reports it and leaves it alone.
-  - It won't interrogate you. One brief, one existing-work check, one routing question; deeper questions belong to `/mynrd-plan`.
-
----
-
 ## `/mynrd-plan`
 
-- **Arg:** `[.work folder path?]` - optional. With no arg it continues from the folder intake opened this session, or starts fresh.
-- **Writes files?** `.work/<slug>/PLAN.md` + fills in `progress.json` (acceptance criteria, test tiers).
-- **What it does:** A discussion that ends in a plan. Takes the request (from intake's brief, or cold - just tell it), surfaces gaps via 1-2 clarifying questions per turn, then writes `PLAN.md`: approach, file hints, sequencing, a numbered acceptance-criteria list, and a `## Testing` section naming the tiers and commands. `progress.json` in the same folder gets every AC as `pending` and the test tiers resolved from `## Testing`.
+- **Arg:** `[raw text | .work folder path]` - optional. Paste the request inline to skip the intro; give a `.work/` folder path to re-plan it; give nothing and it asks what needs planning.
+- **Writes files?** `.work/<date>-<slug>/PLAN.md` + `progress.json` (creates it), and `.gitignore` gets a `.work/` entry if it lacks one.
+- **What it does:** The front door and the planning step. Checks `.work/` for a folder that already covers the request (and offers to re-plan it), keeps any findings the session already established (one line each with the `path:line` that proves it), restates the request, surfaces gaps via 1-2 clarifying questions per turn, then writes `PLAN.md`: approach, file hints, sequencing, a numbered acceptance-criteria list, and a `## Testing` section naming the tiers and commands. `progress.json` in the same folder gets every AC as `pending`, the test tiers resolved from `## Testing`, and the findings.
 - **Notes:**
-  - **No entry requirement.** Run it cold whenever you want - no `/mynrd-intake` first, no existing `.work/` folder. Run cold, it creates the folder itself and marks the `intake` step `skipped`.
-  - **It is the only command that writes `PLAN.md`,** which is what `/mynrd-dispatch` builds from. That's why intake sends you here before any build.
-  - **Re-running it on existing work re-opens the plan.** Editing the AC remaps the test links in `progress.json`: existing criteria are matched by text and carry their pass/fail state across; any test case whose AC disappeared has its link dropped and named out loud rather than left pointing at a renumbered criterion.
+  - **It never asks what shape the plan takes.** A defect gets the Repro Steps format, everything else gets the Description format, decided from the discussion.
+  - **It is the only command that writes `PLAN.md` and creates `progress.json`,** which is what `/mynrd-dispatch` builds from. Nothing builds without them.
+  - **It stops after writing.** It never continues into the build - run `/mynrd-dispatch` yourself.
+  - **Re-running it on existing work re-opens the plan.** Editing the AC remaps the test links in `progress.json`: existing criteria are matched by text and carry their pass/fail state across; any test case whose AC disappeared has its link dropped and named out loud rather than left pointing at a renumbered criterion. If the build was already `done` and the AC changed, `build` goes back to `pending` and verification is locked again.
+  - **Parking is just not planning.** If something is real but not for now, say so; nothing needs to be written.
 
 ---
 
 ## `/mynrd-refine`
 
 - **Arg:** none
-- **Writes files?** No - output is a markdown block in the terminal.
-- **What it does:** Synthesizes the current conversation (what you've been discussing with Claude in this session) into a formatted **Story / Task / Bug** draft - Description + AC for a Story or Task, Repro Steps + AC for a Bug - with the recommended type pre-flagged.
+- **Writes files?** No by default - output is a markdown block in the terminal. If a `.work/` folder already exists for the thread it offers to save the draft there as `DRAFT.md`.
+- **What it does:** Synthesizes the current conversation (what you've been discussing with Claude in this session) into a formatted draft - Description + AC for work, Repro Steps + AC for a bug. It decides the shape from the discussion and says so; it doesn't ask.
 - **Notes:** Useful when you've been brainstorming and want structured output before deciding what to do next. It doesn't plan or build - paste the draft into `/mynrd-plan` (or wherever you track work) as a separate step. Fits anywhere in the sequence.
 
 ---
 
 ## `/mynrd-dispatch`
 
-- **Arg:** `[.work folder path?]` - optional. With no arg it finds the one `.work/` folder with unfinished build state. A path ending in `.md` also works.
+- **Arg:** `[slug | .work folder path?]` - optional. With no arg it finds the one `.work/` folder with unfinished build state. A bare slug matches `.work/*-<slug>/`; a path ending in `.md` also works.
 - **Writes files?** Source edits (via the agents), `progress.json` updates, and local git commits.
 - **What it does:** The build loop between planning and your own verification. **It runs the development to completion and reports once** - no per-slice check-ins, no "shall I continue".
   1. Loads `PLAN.md` from the work folder. No plan file → it tells you to run `/mynrd-plan` and stops.
-  2. Opens `progress.json` beside it. **It never creates that file** - `/mynrd-intake` does, `/mynrd-plan` fills it in. It resumes from the first step that isn't `done` or `skipped` instead of starting over.
+  2. Opens `progress.json` beside it. **It never creates that file** - `/mynrd-plan` does. It resumes from the first step that isn't `done` or `skipped` instead of starting over.
   3. Resolves the test tiers from the plan's `## Testing` section and checks the commands actually exist in the repo.
   4. Decomposes the AC into an ordered task list.
   5. Dispatches each task to the right specialist agent - `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX) - handing each the AC text, the plan notes, and the file paths; independent tasks run in parallel. These five ship inside the plugin, so there's nothing to set up.
@@ -82,7 +65,7 @@ For each command:
 
 ## `/mynrd-verified`
 
-- **Arg:** `[.work folder path or slug?]` - optional; any free text after it is kept as a one-line note of what you checked. With no arg it lists the folders awaiting verification and asks which.
+- **Arg:** `[slug | .work folder path?]` - optional; any free text after it is kept as a one-line note of what you checked. With no arg it lists the folders awaiting verification and asks which.
 - **Writes files?** One - the folder's `progress.json`.
 - **What it does:** Records that **you** verified the work. Running it is your statement "I exercised this and I'm satisfied" - the command verifies nothing itself. It sets `workflow[human-verification]` to `done` with its `endedAt`, stamps `humanVerification.verifiedAt` (+ your note, if given), and sets the top-level `status` to `verified` - the workflow's terminal state.
 - **Notes:**

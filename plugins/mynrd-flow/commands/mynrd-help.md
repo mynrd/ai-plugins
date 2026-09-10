@@ -25,7 +25,7 @@ Print this short intro:
 
 > **`/mynrd-help` — what do you need to know?**
 >
-> I can help with: command reference, the intake → plan → dispatch workflow, the `.work/<slug>/` folder and `progress.json`, common errors, terminology, or general orientation. Ask anything.
+> I can help with: command reference, the plan → dispatch → verified workflow, the `.work/` folder and `progress.json`, common errors, terminology, or general orientation. Ask anything.
 >
 > If you're not sure where to start, type `start` and I'll give you a tour of the workflow.
 
@@ -91,7 +91,7 @@ If the user asks something this command shouldn't answer:
 
 These need the actual work folder, not help docs. Redirect:
 
-> That's the state of a specific work folder, not a help-doc question. Open `.work/<slug>/progress.json` (or `PLAN.md`) — that's where `/mynrd-dispatch` records every AC and test case.
+> That's the state of a specific work folder, not a help-doc question. Open `.work/<YYYY-MM-DD>-<slug>/progress.json` (or `PLAN.md`) — that's where `/mynrd-dispatch` records every AC and test case.
 
 ### Question that needs the user to invoke another command
 
@@ -123,4 +123,4 @@ After answering, don't ask "anything else?" or add a recap. Just stop. If the us
 - Modifies any file outside `.help/`
 - Modifies a `.help/` file without the user's explicit confirmation
 - Guesses at command behavior, file names, or workflow rules — if it's not in the loaded files, the command says so
-- Answers questions about the state of a specific work folder (read `.work/<slug>/progress.json` for that)
+- Answers questions about the state of a specific work folder (read the folder's `progress.json` for that)
