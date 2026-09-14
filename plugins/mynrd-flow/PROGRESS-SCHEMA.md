@@ -7,8 +7,14 @@
 Relative to the repo root (`git rev-parse --show-toplevel`; fall back to the current working directory when not in a repo). Same folder that holds `PLAN.md` — one directory per unit of work:
 
 ```text
-.work/<YYYY-MM-DD>-<slug>/progress.json
+.work/<YYYY-MM-DD>-<slug>/
+  progress.json     this file
+  PLAN.md           written by /mynrd-plan
+  BUILD.md          written by /mynrd-dispatch at exit — the handoff report on disk; later runs of the same folder add BUILD_02.md, BUILD_03.md, …
+  REVISED_01.md …   one per post-handoff change made in the dispatch conversation, numbered in order
 ```
+
+`BUILD*.md` and `REVISED_*.md` are narrative — they record what a run reported and what changed afterwards. They never carry state this file holds, and nothing reads them back to decide a step. Their rules live in `commands/mynrd-dispatch.md` § "`BUILD.md`" and § "After the handoff".
 
 - `<slug>` — lowercased, non-alphanumerics collapsed to single hyphens, trimmed, max 40 chars. Taken from the plan's title.
 - **The dated folder name is permanent** — it is the work's local `id`, and everything downstream refers to it. Don't rename it once anything has been written into it. `slug` is set once, at creation, and never rewritten — it must always equal the folder name minus its date prefix.
@@ -189,7 +195,7 @@ Concretely: someone who drives the edits themselves skips `build`. Someone who s
 | Command | Fields it owns |
 | --- | --- |
 | `/mynrd-plan` | creates the file · `id` · `slug` · `title` · `plan` · `findings[]` · `acceptanceCriteria[]` (incl. `task` + `evidence`) · `tasks[]` entries it creates · `tests.*.enabled` + `command` · `workflow[plan]` |
-| `/mynrd-dispatch` | `branch` · `acceptanceCriteria[].status` + `implementedIn` + `verified` · `tasks[].state` + `commits[]` + `startedAt`/`endedAt` · `tests.*` results · `runs[]` · `humanVerification.unlocked` + `unlockedAt` · `workflow[build]` · `workflow[human-verification].status` + `startedAt` at unlock only |
+| `/mynrd-dispatch` | `branch` · `acceptanceCriteria[].status` + `implementedIn` + `verified` · `tasks[].state` + `commits[]` + `startedAt`/`endedAt` · `tests.*` results · `runs[]` · `humanVerification.unlocked` + `unlockedAt` · `workflow[build]` · `workflow[human-verification].status` + `startedAt` at unlock only · beside the file: `BUILD*.md` at exit, `REVISED_NN.md` for post-handoff changes (neither touches this file) |
 | `/mynrd-verified` | `workflow[human-verification].status = done` + `endedAt` · `humanVerification.verifiedAt` + `note` · top-level `status = "verified"` — on the human's say-so only |
 
 `tasks[].state`, `tasks[].commits[]`, and the task stamps are **`/mynrd-dispatch`'s alone** — it is the only command in this plugin that commits. Everything else treats them as read-only.

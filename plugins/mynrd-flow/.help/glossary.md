@@ -36,6 +36,14 @@ Code written makes an AC `implemented`; only evidence makes it `pass`. An AC not
 
 The plan file in `.work/<date>-<slug>/` - approach, file hints, sequencing, the AC list, and a `## Testing` section naming tiers and commands. Written only by `/mynrd-plan`; read (never edited) by the agents; what `/mynrd-dispatch` builds from.
 
+### `BUILD.md`
+
+The handoff report `/mynrd-dispatch` prints at exit, saved in `.work/<date>-<slug>/` before it's printed. First run writes `BUILD.md`; each later dispatch of the same folder writes the next `BUILD_02.md`, `BUILD_03.md`, ... - earlier ones are never overwritten. Both exits write it: green opens with `Development is done - try it now.`, blocked with `Blocked - I need a decision before I can finish.`
+
+### `REVISED_NN.md`
+
+One file per change you ask for after a green handoff, in the same conversation - `REVISED_01.md`, `REVISED_02.md`, ... in the work folder. Records the ask in your words, every file changed and why, the tests run, and the commit if you asked for one (otherwise `not committed`). Written only when files actually changed; `progress.json` isn't touched.
+
 ### `progress.json`
 
 The state file in `.work/<date>-<slug>/` - the whole workflow's memory: findings, workflow steps, ACs, tasks, test cases, runs. Created by `/mynrd-plan`, updated during the build only by `/mynrd-dispatch`, closed by `/mynrd-verified`. Agents never write it. See [progress.md](progress.md).

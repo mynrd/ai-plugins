@@ -1,6 +1,6 @@
 ---
 name: mynrd-dispatch
-description: Run the build loop for planned work to completion — dispatch implementation to the right specialist agents, start the local stack when a check needs it, run the test tiers named in the plan (unit / UI), and keep looping across every AC until the development is done or genuinely blocked. Records every AC and every test case in the work folder's progress.json. Fully local — it reads a plan, edits code, runs tests, updates one JSON file.
+description: Run the build loop for planned work to completion — dispatch implementation to the right specialist agents, start the local stack when a check needs it, run the test tiers named in the plan (unit / UI), and keep looping across every AC until the development is done or genuinely blocked. Records every AC and every test case in the work folder's progress.json and writes the handoff report to BUILD.md beside it; post-handoff changes in the same conversation get REVISED_NN.md. Fully local — it reads a plan, edits code, runs tests, updates the work folder.
 ---
 
 # /mynrd-dispatch
@@ -351,7 +351,7 @@ Unlocks only when all three hold:
 
 Committing is **not** a condition. A green run on a protected branch, or one whose commits a pre-commit hook rejected, still unlocks verification — it just says so in the report.
 
-Then, in this order: `workflow[build] = done` with its `endedAt` · `workflow[human-verification] = in_progress` with its `startedAt` — **the stage begins here and only here**, because the actor is now the human (its `endedAt` is theirs; you never write it) · `status = "green"` · `humanVerification.unlocked = true` · stamp `unlockedAt` · stop every service you started · then report. **This message is the handoff** — it's the first thing the user reads since they typed the command, so it says what you built and what to poke at, not just a status line:
+Then, in this order: `workflow[build] = done` with its `endedAt` · `workflow[human-verification] = in_progress` with its `startedAt` — **the stage begins here and only here**, because the actor is now the human (its `endedAt` is theirs; you never write it) · `status = "green"` · `humanVerification.unlocked = true` · stamp `unlockedAt` · stop every service you started · write the report to `BUILD.md` (below) · then print the same report. **This message is the handoff** — it's the first thing the user reads since they typed the command, so it says what you built and what to poke at, not just a status line:
 
 ```text
 Development is done — try it now.
@@ -386,11 +386,70 @@ satisfied, /mynrd-verified e2e-standard closes this out.
 
 **If nothing was committed** (protected branch, hook rejection), say that in the block instead of the SHAs and name why.
 
+### `BUILD.md` — the report on disk
+
+The terminal message scrolls away; the file doesn't. **Both exits write it**, in the work folder beside `PLAN.md`, before the message is printed and after every `progress.json` write — so file and message never disagree.
+
+- **Name:** `BUILD.md` for the first dispatch of a folder. Every later dispatch of the same folder (a blocked run resumed, a re-plan rebuilt) writes the next unused `BUILD_NN.md` — `BUILD_02.md`, `BUILD_03.md`, … zero-padded to two digits. **Never overwrite an earlier one**; each is the record of one run.
+- **Content:** a two-line header, then the report verbatim — the same text you print, same summary block, same sections.
+
+```markdown
+# Build — 2026-08-15-e2e-standard
+Exit: green · 2026-08-15T17:42:10+02:00 · run 1 of this folder
+
+Development is done — try it now.
+
+  AC:      12/12 pass  (8 by test, 3 live, 1 review)
+  ...
+```
+
+`Exit:` is `green` or `blocked`. The blocked report goes in the same shape, opening with `Blocked — …`. Nothing else — no extra commentary the terminal didn't get, no fields `progress.json` already holds.
+
 **Blocked exit** — anything unfinished, whether one AC or nine: `workflow[build] = blocked` with its `endedAt`, `human-verification` **stays `pending`** (the stage never started), `humanVerification.unlocked` stays `false`, `status = "blocked"`. Open with `Blocked — I need a decision before I can finish.` Then the same shape: what did land (with its commits), then every blocker together, each naming the AC, what you tried, and the exact decision or resource you need. Close by naming what you'll do once you have it.
 
 **Do not invite verification in this message.** The user may well go and look at the code — that's theirs to choose — but you are asking for a decision, not handing off. "Try it now" belongs to the green exit alone. Never announce readiness the file contradicts, and never present a partial build as done.
 
 **The command never records verification as done.** That's the human's — they record it themselves with `/mynrd-verified`, which is the only writer of `workflow[human-verification].endedAt`.
+
+---
+
+## After the handoff — revisions in this conversation
+
+The green exit is not always the end of the conversation. The user reads the report, exercises the change, and often asks for more right there: *"rename that flag"*, *"the empty-state copy is wrong"*, *"drop the second query"*. Those edits are as much a part of the work as the build was, and a later session must be able to see them — so **every completed post-handoff request is written down** in the work folder as `REVISED_NN.md`.
+
+**When it applies.** A green `BUILD*.md` exists for this folder and the user asks for a change to the files in the same conversation. Then:
+
+- Make the change as asked — directly, or through the same specialist agents; your call.
+- Run the tiers that cover what you touched. Same rules as Step 6: a test you can't run is `not run` with the reason, never silently skipped.
+- **Do not commit unless the user asks.** The build loop commits per task because that's its job; a revision is the user's edit, made through you, on history they may already be reworking.
+- Write `REVISED_NN.md` — the next unused number in the folder, zero-padded to two digits, starting at `REVISED_01.md`. **One file per request**, however many files it touched. Then answer.
+
+```markdown
+# Revision 02 — drop the second query on the orders list
+Requested: "the orders page runs the count query twice, get rid of one"
+When: 2026-08-15T18:05:41+02:00
+
+## Changed
+- src/ERP.Web/Orders/OrdersList.razor.cs — removed the standalone `CountAsync`; the page total now comes from the paged result's `TotalCount`.
+- tests/ERP.Web.Tests/Orders/OrdersListTests.cs — `Loads_page_issues_single_count_query` added.
+
+## Tests
+- unit: PASS (866)
+- ui: not run (no template change)
+
+## Commit
+- not committed
+```
+
+`Requested:` is the ask in the user's words, one or two lines, trimmed but not paraphrased away. `## Changed` names every file with what and why. `## Commit` is the SHA and branch with `not pushed` if the user asked you to commit, otherwise `not committed`.
+
+**What is not a revision.**
+
+- **A request while `workflow[build]` is `blocked`** is the loop resuming — the user is answering your blocker. Run Step 7 onward; the exit writes the next `BUILD_NN.md`, not a `REVISED` file.
+- **A question, a review, a request you declined, an explanation** — nothing changed on disk, nothing to record.
+- **A change the user made themselves** in their editor. You document what you did, not what they did.
+
+`progress.json` is not touched by a revision. `acceptanceCriteria[]`, `tasks[]`, `runs[]` describe the build; the `REVISED` files describe what came after it. If a revision is large enough that the AC list no longer describes the work — new behaviour, a criterion that's now false — say so and point at `/mynrd-plan` to re-plan instead of stretching a revision note over it.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "name": "mynrd-flow",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Personal dev workflow toolkit — plan a request with /mynrd-plan, refine drafts with /mynrd-refine, run the build loop with /mynrd-dispatch using specialist implementation agents, and close verified work with /mynrd-verified. Includes /mynrd-help with a grounded knowledge base. Fully local: no issue tracker or DevOps dependency.",
   "author": { "name": "mynrd" }
 }

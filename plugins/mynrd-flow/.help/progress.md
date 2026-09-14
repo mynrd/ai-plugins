@@ -12,7 +12,12 @@ One directory per unit of work, relative to the repo root:
 .work/<YYYY-MM-DD>-<slug>/
   progress.json     the state file - the whole workflow's memory
   PLAN.md           written by /mynrd-plan - what /mynrd-dispatch builds from
+  BUILD.md          written by /mynrd-dispatch at exit - the handoff report, kept on disk
+  BUILD_02.md ...   one more per later dispatch of the same folder (a blocked run resumed, a re-plan rebuilt)
+  REVISED_01.md ... one per change you asked for after the handoff, in the dispatch conversation
 ```
+
+`BUILD*.md` and `REVISED_*.md` are records, not state - `progress.json` never points at them and no command reads them back. They're there so the report and the after-the-fact edits survive the conversation that produced them.
 
 - `<slug>` - lowercased plan title, non-alphanumerics collapsed to single hyphens, trimmed, max 40 chars. Set once at creation and never renamed. `/mynrd-dispatch <slug>` and `/mynrd-verified <slug>` find the folder by suffix match.
 - **`.gitignore` must cover `.work/`** - the first command to write there adds the entry if it's missing. The folder is machine-local state and never gets committed, so a fresh clone starts without it.

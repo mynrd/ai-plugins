@@ -37,7 +37,7 @@ For each command:
 ## `/mynrd-dispatch`
 
 - **Arg:** `[slug | .work folder path?]` - optional. With no arg it finds the one `.work/` folder with unfinished build state. A bare slug matches `.work/*-<slug>/`; a path ending in `.md` also works.
-- **Writes files?** Source edits (via the agents), `progress.json` updates, and local git commits.
+- **Writes files?** Source edits (via the agents), `progress.json` updates, `BUILD.md` (the handoff report, `BUILD_02.md` and up on later runs of the same folder), `REVISED_NN.md` for each change you ask for after the handoff in the same conversation, and local git commits.
 - **What it does:** The build loop between planning and your own verification. **It runs the development to completion and reports once** - no per-slice check-ins, no "shall I continue".
   1. Loads `PLAN.md` from the work folder. No plan file → it tells you to run `/mynrd-plan` and stops.
   2. Opens `progress.json` beside it. **It never creates that file** - `/mynrd-plan` does. It resumes from the first step that isn't `done` or `skipped` instead of starting over.
@@ -47,7 +47,7 @@ For each command:
   6. **Starts the local stack when a check needs it** - the backend host, the UI dev server - without asking you.
   7. Runs the tiers in order - unit → UI - stopping at the first failure, recording every test case and its status.
   8. Loops: diagnose, fix, re-run, then straight on to the next unfinished AC. **Two attempts per distinct failure**, after which that AC is marked blocked and the loop continues with the rest.
-  9. Unlocks human verification when everything is green, and hands off with what it built and what to look at.
+  9. Unlocks human verification when everything is green, writes the report to `BUILD.md` in the work folder, and hands off with what it built and what to look at. A blocked run writes `BUILD.md` too, opening with the blockers.
 - **Notes:**
   - **The agents implement exactly the ACs they're handed.** They never run git and never edit `progress.json` or `PLAN.md` - they return a structured report, and `/mynrd-dispatch` transcribes it into `progress.json`. All bookkeeping and all git is the loop's own.
   - **`implemented` is not `pass`.** Code written makes an AC `implemented`; only a named passing test makes it `pass`. An AC no test covers is reported as a gap - "AC #3 is implemented but nothing tests it" - never counted as done.
@@ -58,6 +58,7 @@ For each command:
   - **It runs your app when it has to, and cleans up after itself.** If something already answers on the port, it uses that and leaves it alone; anything it started itself it kills - process tree and all - before it reports. Your shell may still prompt for the command the first time - that's the Bash permission on your machine, allowlisted once in the repo's `.claude/settings.json`.
   - **One blocker doesn't end the run.** Two failed fix attempts on the same failure marks that AC blocked; the loop keeps building every AC that doesn't depend on it and lists all the blockers together at the end. It stops early only for something it genuinely can't decide - new scope, a missing credential, a schema call.
   - **It never edits a test to make it pass.** If a test itself looks wrong, it leaves it red and says so in the report.
+  - **Changes you ask for after the handoff get written down.** Still in the dispatch conversation, once the build is green, every request that changes files ends with a `REVISED_01.md`, `REVISED_02.md`, ... in the work folder: what you asked, which files changed and why, which tests ran, and whether it was committed (it isn't unless you say so). Questions and declined requests get no file. A request while the build is `blocked` is the loop resuming, not a revision - that ends in the next `BUILD_NN.md`.
   - **It commits, and only commits.** One commit per task as that task goes green, staging only the files its agents changed - never `git add -A`. **It never pushes**, never amends, never branches: the commits are yours to squash or drop before you push. On a protected branch (`main`, `master`, `dev`, `develop`, `release/*`, `hotfix/*`) it commits nothing all run and says so. A pre-commit hook that rejects it is reported, never bypassed with `--no-verify`.
   - Green loop ≠ done. The next step is you exercising the change, reviewing its commits, then pushing yourself - and closing the work with `/mynrd-verified` when you're satisfied.
 

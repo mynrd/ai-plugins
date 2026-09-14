@@ -50,7 +50,7 @@ No environment variables, no MCP server, no further setup.
 
 Each stage writes to the project's `.work/<date>-<slug>/` folder. `/mynrd-refine` and `/mynrd-help` fit anywhere in between.
 
-The `.work/<date>-<slug>/` folder is the plugin's only state: `PLAN.md` (what to build) and `progress.json` (every AC, every test case, timestamps, blockers). Its schema lives in `plugins/mynrd-flow/PROGRESS-SCHEMA.md`. The folder is meant to be git-ignored in your project (add `.work/` to your `.gitignore`); nothing else reads or writes it.
+The `.work/<date>-<slug>/` folder is the plugin's only state: `PLAN.md` (what to build), `progress.json` (every AC, every test case, timestamps, blockers), `BUILD.md` (the dispatch handoff report, `BUILD_02.md` and up on later runs), and `REVISED_NN.md` (one per change asked for after the handoff). Its schema lives in `plugins/mynrd-flow/PROGRESS-SCHEMA.md`. The folder is meant to be git-ignored in your project (add `.work/` to your `.gitignore`); nothing else reads or writes it.
 
 Dispatch ends at "development is done - try it now" and hands verification to you. `/mynrd-verified` is how you say it happened: it verifies nothing itself, it records your sign-off so a later session sees finished work instead of a step stuck in progress.
 
