@@ -1,6 +1,6 @@
 # Getting started
 
-You're using **mynrd-flow**, a personal workflow plugin for Claude Code - 5 slash commands that take a raw request from "someone asked for this" to "built and tested", entirely on your machine. No external services, no boards, no credentials. The only things it ever writes are files in your repo (`.work/` state + the source edits you asked for) and local git commits.
+You're using **mynrd-flow**, a personal workflow plugin for Claude Code - 6 slash commands that take a raw request from "someone asked for this" to "built and tested", entirely on your machine. No external services, no boards, no credentials. The only things it ever writes are files in your repo (`.work/` state + the source edits you asked for) and local git commits.
 
 ---
 
@@ -11,7 +11,15 @@ claude plugin marketplace add https://github.com/mynrd/ai-plugins.git
 claude plugin install mynrd-flow@mynrd-ai-plugins
 ```
 
-That's it. **No setup step, no env vars, no sign-in.** The five specialist agents ship inside the plugin, so there's nothing else to configure.
+**No env vars, no sign-in.** The five specialist agents ship inside the plugin.
+
+Then, once per project:
+
+```
+/mynrd-init
+```
+
+It allowlists what the build loop needs in `.claude/settings.local.json` so `/mynrd-dispatch` runs without permission prompts, and writes the workflow's default rules to `CLAUDE.local.md`. Optional - everything works without it, you just press accept a lot.
 
 ---
 

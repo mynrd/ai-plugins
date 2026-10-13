@@ -52,7 +52,7 @@ Deliberate. The loop never edits a test to make it pass. If the test itself is t
 
 ### The shell prompts for permission on every test command
 
-That's your machine's Bash permission, not the plugin. Allowlist the repo's test and dev-server commands once in the repo's `.claude/settings.json` and the prompts stop.
+That's your machine's Bash permission, not the plugin. Run `/mynrd-init` once in the repo - it adds the allow rules to `.claude/settings.local.json` - then restart Claude Code. Still prompting after that means an `ask` or `deny` rule of your own covers the command; `/mynrd-init check` names it.
 
 ### The dev server the loop started is still running
 

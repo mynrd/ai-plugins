@@ -260,7 +260,7 @@ Record it in the round's `runs[]` entry:
 ]
 ```
 
-**The harness may still prompt for the shell command itself.** That's a Bash permission on the user's machine, not this command asking your permission — it's answered once and allowlisted in the target repo's `.claude/settings.json`.
+**The harness may still prompt for the shell command itself.** That's a Bash permission on the user's machine, not this command asking your permission — `/mynrd-init` allowlists it in the target repo's `.claude/settings.local.json`; point at it once in the report if the run was prompted.
 
 ---
 

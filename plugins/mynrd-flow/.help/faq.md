@@ -92,7 +92,7 @@ claude plugin marketplace add https://github.com/mynrd/ai-plugins.git
 claude plugin install mynrd-flow@mynrd-ai-plugins
 ```
 
-No setup step after that - no env vars, no credentials, no external services.
+No env vars, no credentials, no external services. Run `/mynrd-init` once per project to stop the permission prompts during `/mynrd-dispatch`.
 
 ### "I edited the source - how do I get the changes into my editor?"
 

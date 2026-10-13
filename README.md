@@ -8,10 +8,11 @@ Everything here runs fully local: no issue tracker, no external services, no cre
 
 ### mynrd-flow
 
-A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - five slash commands and five specialist implementation agents.
+A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - six slash commands and five specialist implementation agents.
 
 | Command | What it does |
 |---|---|
+| `/mynrd-init` | One-time project setup: allowlist what the build loop needs in `.claude/settings.local.json` so `/mynrd-dispatch` runs without permission prompts, and write the workflow's default rules to `CLAUDE.local.md`. Merges, never overwrites. |
 | `/mynrd-plan` | The entry point. Take a raw request (idea, bug report, chat blob), check `.work/` for existing work on it, discuss it, and write `PLAN.md` (Context, What needs to happen, Out of scope, Dependencies, Acceptance Criteria, Implementation notes, Testing) plus `progress.json` into `.work/<date>-<slug>/`. |
 | `/mynrd-refine` | Refine a discussion thread into a formatted draft (Description + AC, or Repro Steps + AC for a bug). |
 | `/mynrd-dispatch` | Run the build loop: dispatch acceptance criteria to specialist agents, run the test tiers named in the plan, commit per task, and loop until every AC is terminal. Records everything in `progress.json`. |
@@ -39,7 +40,7 @@ claude plugin install mynrd-flow@mynrd-ai-plugins
 
 Cursor: the repo ships a `.cursor-plugin/marketplace.json` manifest; add this repo as a plugin source the same way.
 
-No environment variables, no MCP server, no further setup.
+No environment variables, no MCP server. Run `/mynrd-init` once per project to skip the permission prompts.
 
 ## Workflow
 
@@ -60,7 +61,7 @@ Dispatch ends at "development is done - try it now" and hands verification to yo
 .claude-plugin/marketplace.json   Claude Code marketplace manifest
 .cursor-plugin/marketplace.json   Cursor marketplace manifest
 plugins/mynrd-flow/               The plugin
-  commands/                       The five slash commands
+  commands/                       The six slash commands
   agents/                         The five specialist agents
   .help/                          Knowledge base read by /mynrd-help
   PROGRESS-SCHEMA.md              The progress.json schema every command reads

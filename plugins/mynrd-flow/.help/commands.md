@@ -1,6 +1,6 @@
 # Command reference
 
-5 slash commands. Everything is local - no command talks to any external service.
+6 slash commands. Everything is local - no command talks to any external service.
 
 For each command:
 
@@ -8,6 +8,21 @@ For each command:
 - **Writes files?** - what it puts on disk
 - **What it does** - summary
 - **Notes** - gotchas, related commands
+
+---
+
+## `/mynrd-init`
+
+- **Arg:** `[check]` - optional. With no arg it checks, shows what would change, asks once, and writes. `check` reports only.
+- **Writes files?** `.claude/settings.local.json` (permission rules), `CLAUDE.local.md` (a managed rules block), and `.gitignore` entries for both plus `.work/`. All personal, all git-ignored.
+- **What it does:** Per-project setup so `/mynrd-dispatch` runs without permission prompts. Adds `Bash`, `PowerShell`, `Edit`, `Write`, `WebFetch` to `permissions.allow` and `git push` to `permissions.deny`, and writes the default rules for planning, building, git, and verification - plus the repo's detected unit / UI test commands - into `CLAUDE.local.md` between `<!-- mynrd-flow:start -->` and `<!-- mynrd-flow:end -->`.
+- **Notes:**
+  - **It merges, never overwrites.** Existing settings keys and rules stay as they are; in `CLAUDE.local.md` only the text between the markers is replaced. Safe to re-run after a plugin update.
+  - **One confirmation, always.** It lists the exact rules before writing - the allowlist lets every later session in the project run commands and edit files without asking.
+  - **Pushing stays blocked.** The `deny` rule wins over the broad `Bash` allow. Remove those two lines yourself if you want to push from a Claude session.
+  - **Restart Claude Code afterwards** - permissions are read when a session starts.
+  - It never touches `.claude/settings.json`, `CLAUDE.md`, or `~/.claude/`, never sets `defaultMode` or `bypassPermissions`, and won't overwrite a settings file it can't parse.
+  - Claude Code only - Cursor doesn't read `settings.local.json`.
 
 ---
 
@@ -55,7 +70,7 @@ For each command:
   - **Human verification unlocks only when** every AC is `pass`, every enabled tier is `pass`, and no round ended blocked. Otherwise it stays `blocked` and the command says what's holding it.
   - **It never asks you to test half-built work.** The run ends one of two ways and nothing else: `Development is done - try it now.` or `Blocked - I need a decision before I can finish.` If proving an AC needs the app clicked through, that's its job, not yours.
   - **Unit and UI are the only tiers.** There's no e2e tier - browser suites (Playwright, Cypress) aren't run here, however installed the repo is. Anything that needs one is on you in the verification step.
-  - **It runs your app when it has to, and cleans up after itself.** If something already answers on the port, it uses that and leaves it alone; anything it started itself it kills - process tree and all - before it reports. Your shell may still prompt for the command the first time - that's the Bash permission on your machine, allowlisted once in the repo's `.claude/settings.json`.
+  - **It runs your app when it has to, and cleans up after itself.** If something already answers on the port, it uses that and leaves it alone; anything it started itself it kills - process tree and all - before it reports. Your shell may still prompt for the command the first time - that's the Bash permission on your machine, allowlisted for good by `/mynrd-init`.
   - **One blocker doesn't end the run.** Two failed fix attempts on the same failure marks that AC blocked; the loop keeps building every AC that doesn't depend on it and lists all the blockers together at the end. It stops early only for something it genuinely can't decide - new scope, a missing credential, a schema call.
   - **It never edits a test to make it pass.** If a test itself looks wrong, it leaves it red and says so in the report.
   - **Changes you ask for after the handoff get written down.** Still in the dispatch conversation, once the build is green, every request that changes files ends with a `REVISED_01.md`, `REVISED_02.md`, ... in the work folder: what you asked, which files changed and why, which tests ran, and whether it was committed (it isn't unless you say so). Questions and declined requests get no file. A request while the build is `blocked` is the loop resuming, not a revision - that ends in the next `BUILD_NN.md`.
