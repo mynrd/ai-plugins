@@ -172,6 +172,7 @@ The full schema, folder rules, and status vocabularies are defined once, in `${C
 
 ### Write rules
 
+- **Write it with the Write or Edit tool — never through the shell.** No helper script, no heredoc or PowerShell here-string, no `python -c` / `node -e` / `jq` / `Set-Content` / `ConvertTo-Json` rewriting the file. A shell command carrying an inline script is one the harness can't analyze, so it stops and asks the user on every single write — and this file is written dozens of times a build.
 - **Rewrite the whole file on every transition** — step or task started, agent dispatched, agent returned, tier run, round closed, step or task ended. It's small; a stale `updated` is worse than the write.
 - **Every start and end is stamped in the write that caused it.** `workflow[]` steps, `tasks[]`, and `runs[]` all carry `startedAt` / `endedAt` per `PROGRESS-SCHEMA.md` § "Every step records when it started and when it ended" — written at the moment of the transition, never back-filled at the end of the turn.
 - `updated` is local ISO-8601 with offset.
@@ -259,6 +260,8 @@ Record it in the round's `runs[]` entry:
     "ready": true, "stoppedAt": "2026-08-15T19:20:11+08:00" }
 ]
 ```
+
+**Keep every shell command plain, here and everywhere in the loop — Bash and PowerShell alike.** One command per shell call, typed the way a person would: `npm test`, `git status`, `dotnet build`. No heredocs or here-strings (`@'…'@`), no inline scripts, no shell variables or `$(…)`, no reading files with `cat` / `sed` / `head` / `Get-Content` / `Select-String` (that's the Read tool), no writing them with `Set-Content` / `Out-File` / `>` (that's Write or Edit), no chaining a read onto a write with `;`, `&&`, or a pipeline. The allowlist covers a command the harness can parse; one it can't parse asks the user no matter what is allowlisted. Say the same to every agent you dispatch.
 
 **The harness may still prompt for the shell command itself.** That's a Bash permission on the user's machine, not this command asking your permission — `/mynrd-init` allowlists it in the target repo's `.claude/settings.local.json`; point at it once in the report if the run was prompted.
 

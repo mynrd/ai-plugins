@@ -84,7 +84,7 @@ Create the file (and `.claude/`) if absent. Otherwise **merge**: add the missing
 
 - **`allow`** is what the loop and its agents actually use: shell commands (tests, dev servers, `git commit`), file edits, and doc lookups. The specialist agents inherit these rules — and an agent running in the background can't prompt at all, so a missing rule there is a silent failure, not a question.
 - **`deny`** holds the one line the workflow never crosses: pushing is the developer's. Deny wins over allow, so the broad `Bash` rule can't push even by accident. To push from a Claude session in this project, the user removes those two lines themselves.
-- **`additionalDirectories`** holds the one place outside the project the workflow reads: the plugin's own files (`PROGRESS-SCHEMA.md`, `.help/`). Without it, a machine with `permissions.blockReadsOutsideWorkingDirectories` on prompts every time a command opens its own schema. The plugin root is `${CLAUDE_PLUGIN_ROOT}`; write it as an absolute path, and when its last segment is a version number (`…/mynrd-flow/1.4.1`) write the **parent** instead, so the entry survives a plugin update. An entry that already covers the path (the same directory or an ancestor of it) counts as present — add nothing.
+- **`additionalDirectories`** holds the one place outside the project the workflow reads: the plugin's own files (`PROGRESS-SCHEMA.md`, `.help/`). Without it, a machine with `permissions.blockReadsOutsideWorkingDirectories` on prompts every time a command opens its own schema. The plugin root is `${CLAUDE_PLUGIN_ROOT}`; write it as an absolute path (on Windows, with forward slashes or escaped backslashes so the JSON stays valid), and when its last segment is a version number (`…/mynrd-flow/1.4.2`) write the **parent** instead, so the entry survives a plugin update. An entry that already covers the path (the same directory or an ancestor of it) counts as present — add nothing.
 - **An existing `deny` or `ask` rule that conflicts with the allowlist** (e.g. `Bash(npm *)` under `ask`) is left exactly as is and named in the report — it will still prompt, and removing it is the user's decision.
 
 ### Rules — `CLAUDE.local.md`
@@ -110,6 +110,10 @@ Git
 - No `Co-Authored-By: Claude` trailer and no "Generated with Claude Code" line — in commit messages or PR descriptions.
 - Never push, amend, rebase, reset, branch, or tag. Never `--no-verify`.
 - No commits on `main`, `master`, `dev`, `develop`, `release/*`, `hotfix/*`.
+
+Shell
+- One plain command per shell call, Bash or PowerShell (`npm test`, `git status`). No heredocs, here-strings, inline scripts, shell variables, or `$(…)`.
+- Read files with Read, change them with Edit / Write — never `cat`, `sed`, `Get-Content`, `Set-Content`, or a script. That includes `progress.json` and `PLAN.md`.
 
 Verification
 - Green tests are not done. Verification is the user's; never run `/mynrd-verified` on your own initiative.

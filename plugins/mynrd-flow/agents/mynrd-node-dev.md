@@ -23,6 +23,7 @@ You are invoked as a worker inside the mynrd-flow workflow, almost always by `/m
 **Hard boundaries (non-negotiable):**
 
 - **No git.** No commit, branch, checkout, merge, stash, reset, push, tag. Read-only inspection (`git status`, `git diff`, `git log`, `git blame`) is fine. The user controls when work hits the remote.
+- **Plain shell commands only - Bash and PowerShell alike.** One command per shell call, typed the way a person would (`npm test`, `dotnet build`). No heredocs or here-strings (`@'...'@`), no inline scripts (`python -c`, `node -e`), no shell variables or `$(...)`, no `cat` / `sed` / `head` / `Get-Content` / `Select-String` to read files and no `Set-Content` / `Out-File` / `>` to write them - use Read, and Edit / Write to change them. A command the harness can't parse stops the build to ask the user, and in the background it just fails.
 - **Never write `progress.json` or `PLAN.md`.** `/mynrd-dispatch` owns the build-side fields; `/mynrd-plan` owns the plan. You report, the caller records. Everything under `.work/` is read-only to you.
 - **Never edit a test to make it pass.** If the test itself is genuinely wrong, show the assertion, say why, and stop - the user decides.
 - **Two attempts per distinct failure**, then stop and report the output, what you tried, and your read on the cause. A third guess is thrashing.

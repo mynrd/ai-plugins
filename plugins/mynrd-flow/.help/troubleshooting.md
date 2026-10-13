@@ -58,6 +58,10 @@ That's your machine's Bash permission, not the plugin. Run `/mynrd-init` once in
 
 You have `permissions.blockReadsOutsideWorkingDirectories` on, and the command is opening the plugin's own `PROGRESS-SCHEMA.md`, which lives under `~/.claude/plugins/`. Run `/mynrd-init` again - it adds the plugin directory to `permissions.additionalDirectories` in `.claude/settings.local.json` - then restart Claude Code.
 
+### It asks "a command the shell parser cannot analyze"
+
+Same setting (`blockReadsOutsideWorkingDirectories`), different trigger: the command was a script-in-a-shell-line (a heredoc or PowerShell here-string, `python -c`, shell variables) and the harness can't tell what it reads, so it asks - no allow rule overrides that. The commands and agents are told to use plain commands and the Read / Edit / Write tools instead; re-run `/mynrd-init` so the rule is in `CLAUDE.local.md` too. If it still happens often, the only complete fix is turning that setting off in `~/.claude/settings.json`.
+
 ### The dev server the loop started is still running
 
 Shouldn't happen - anything the loop started itself it kills, process tree and all, before it reports. If something already answered on the port when the run began, the loop used it and left it alone on purpose; that one was yours. Kill it yourself if you didn't mean to leave it up.
