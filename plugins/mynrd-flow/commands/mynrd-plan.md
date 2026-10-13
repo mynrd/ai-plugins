@@ -141,7 +141,7 @@ No preview, **no gate, no approval prompt of any kind** — neither `AskUserQues
 
 1. **`.gitignore`** must cover `.work/` before either write — see the gitignore rule below.
 2. **`PLAN.md`** per [The `.work` plan folder](#the-work-plan-folder), in `.work/<YYYY-MM-DD>-<slug>/`.
-3. **`progress.json`** in the same folder. Schema, folder naming, and status vocabularies are defined once in `PROGRESS-SCHEMA.md` at the plugin root — read that, don't restate it.
+3. **`progress.json`** in the same folder. Schema, folder naming, and status vocabularies are defined once in `${CLAUDE_PLUGIN_ROOT}/PROGRESS-SCHEMA.md` — read that exact path with the Read tool, don't restate it. Never search for it (`find`, `ls ~/.claude`, a glob): the path is already resolved, and a search outside the project triggers a permission prompt.
 
 ### New plan
 
@@ -189,7 +189,7 @@ The plan lives on disk; the local copy is what `/mynrd-dispatch` reads.
 
 - `<slug>` — lowercased title, non-alphanumerics collapsed to single hyphens, trimmed, max 40 chars. Same rule used for branch names, so `.work/2026-08-14-pdf-export-pagebufferoverflow/` pairs with `bugfix/pdf-export-pagebufferoverflow`. Set once at creation; a re-plan that changes the title does **not** rename the folder or the `slug` field.
 - One directory per unit of work. Re-planning rewrites `PLAN.md` in place; it does not create a second directory or a `PLAN-v2.md`.
-- `progress.json` lives beside `PLAN.md` in the same directory — see `PROGRESS-SCHEMA.md`.
+- `progress.json` lives beside `PLAN.md` in the same directory — see `${CLAUDE_PLUGIN_ROOT}/PROGRESS-SCHEMA.md`.
 - The directory is a container for this item's local working files, so anything else you drop in there is yours to manage. Only `PLAN.md` and `progress.json` are written and read by these commands.
 
 **Gitignore, every time.** Before writing the file, make sure the repo ignores the folder:

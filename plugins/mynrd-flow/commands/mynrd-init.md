@@ -1,6 +1,6 @@
 ---
 name: mynrd-init
-description: Check a project's setup for the mynrd-flow workflow and fix what's missing — `.claude/settings.local.json` permissions so /mynrd-dispatch runs without permission prompts, a `CLAUDE.local.md` block holding the default rules for planning and building, and the `.gitignore` entries that keep all of it local. Safe to re-run; it merges, never overwrites.
+description: Check a project's setup for the mynrd-flow workflow and fix what's missing — `.claude/settings.local.json` permissions so /mynrd-plan and /mynrd-dispatch run without permission prompts, a `CLAUDE.local.md` block holding the default rules for planning and building, and the `.gitignore` entries that keep all of it local. Safe to re-run; it merges, never overwrites.
 ---
 
 # /mynrd-init
@@ -34,7 +34,7 @@ Read, don't write. Collect one row per item:
 
 | Item | OK when |
 | --- | --- |
-| `.claude/settings.local.json` | Exists, parses, and `permissions.allow` / `permissions.deny` contain every rule in § Permissions |
+| `.claude/settings.local.json` | Exists, parses, `permissions.allow` / `permissions.deny` contain every rule in § Permissions, and `permissions.additionalDirectories` contains the plugin directory (§ Permissions) |
 | `CLAUDE.local.md` | Exists and holds a managed block (§ Rules) whose content matches the current one |
 | `.gitignore` | Ignores `.work/`, `.claude/settings.local.json`, and `CLAUDE.local.md` (the exact line or a broader glob) |
 | Test commands | A unit and/or UI test command was found in the repo (`package.json` scripts, a `*.sln` / test `*.csproj`, `pyproject.toml` / `pytest.ini`, …) — informational, never a failure |
@@ -47,7 +47,7 @@ With `check`, print the report (Step 5 format, statuses only) and stop here.
 
 ## Step 3 — Show the changes and confirm once
 
-List exactly what will be written — the rules to be added to `permissions.allow` and `permissions.deny`, whether the `CLAUDE.local.md` block is being created or replaced, the `.gitignore` lines to append. Then one yes/no.
+List exactly what will be written — the rules to be added to `permissions.allow` and `permissions.deny`, the directory to be added to `permissions.additionalDirectories`, whether the `CLAUDE.local.md` block is being created or replaced, the `.gitignore` lines to append. Then one yes/no.
 
 This is the only question the command asks, and it is not skippable: the allowlist lets every later session in this project run shell commands and edit files without asking, and that is the user's call to make with the list in front of them. Everything already OK is listed as such and not touched.
 
@@ -59,7 +59,7 @@ Nothing to change → say the project is already set up and skip to Step 5.
 
 ### Permissions — `.claude/settings.local.json`
 
-Create the file (and `.claude/`) if absent. Otherwise **merge**: add the missing rules to the existing arrays, keep every key and every rule already there, in its existing order. Never remove or rewrite a rule this command didn't add, never touch any key outside `permissions.allow` and `permissions.deny`.
+Create the file (and `.claude/`) if absent. Otherwise **merge**: add the missing rules to the existing arrays, keep every key and every rule already there, in its existing order. Never remove or rewrite a rule this command didn't add, never touch any key outside `permissions.allow`, `permissions.deny`, and `permissions.additionalDirectories`.
 
 ```json
 {
@@ -74,6 +74,9 @@ Create the file (and `.claude/`) if absent. Otherwise **merge**: add the missing
     "deny": [
       "Bash(git push)",
       "Bash(git push *)"
+    ],
+    "additionalDirectories": [
+      "<plugin directory, absolute>"
     ]
   }
 }
@@ -81,6 +84,7 @@ Create the file (and `.claude/`) if absent. Otherwise **merge**: add the missing
 
 - **`allow`** is what the loop and its agents actually use: shell commands (tests, dev servers, `git commit`), file edits, and doc lookups. The specialist agents inherit these rules — and an agent running in the background can't prompt at all, so a missing rule there is a silent failure, not a question.
 - **`deny`** holds the one line the workflow never crosses: pushing is the developer's. Deny wins over allow, so the broad `Bash` rule can't push even by accident. To push from a Claude session in this project, the user removes those two lines themselves.
+- **`additionalDirectories`** holds the one place outside the project the workflow reads: the plugin's own files (`PROGRESS-SCHEMA.md`, `.help/`). Without it, a machine with `permissions.blockReadsOutsideWorkingDirectories` on prompts every time a command opens its own schema. The plugin root is `${CLAUDE_PLUGIN_ROOT}`; write it as an absolute path, and when its last segment is a version number (`…/mynrd-flow/1.4.1`) write the **parent** instead, so the entry survives a plugin update. An entry that already covers the path (the same directory or an ancestor of it) counts as present — add nothing.
 - **An existing `deny` or `ask` rule that conflicts with the allowlist** (e.g. `Bash(npm *)` under `ask`) is left exactly as is and named in the report — it will still prompt, and removing it is the user's decision.
 
 ### Rules — `CLAUDE.local.md`
@@ -140,12 +144,12 @@ One table, then stop:
 ```text
 mynrd-flow setup — <repo root>
 
-  .claude/settings.local.json   updated   (+5 allow, +2 deny)
+  .claude/settings.local.json   updated   (+5 allow, +2 deny, +1 dir)
   CLAUDE.local.md               created
   .gitignore                    ok
   Tests                         unit: dotnet test · ui: none found
 
-Permissions are read when a session starts — restart Claude Code before running /mynrd-dispatch.
+Permissions are read when a session starts — restart Claude Code before running /mynrd-plan or /mynrd-dispatch.
 ```
 
 Statuses are `ok` / `created` / `updated` / `skipped` (with the reason) / `needs attention` (with the reason). Add a line for each conflicting `deny`/`ask` rule left in place and each tracked file that should be ignored. Drop the restart line when no setting changed.
@@ -155,7 +159,7 @@ Statuses are `ok` / `created` / `updated` / `skipped` (with the reason) / `needs
 ## What `/mynrd-init` NEVER does
 
 - Writes `.claude/settings.json`, `CLAUDE.md`, or anything in `~/.claude/` — shared and global config stay the user's
-- Sets `defaultMode`, `bypassPermissions`, or any key outside `permissions.allow` / `permissions.deny`
+- Sets `defaultMode`, `bypassPermissions`, or any key outside `permissions.allow` / `permissions.deny` / `permissions.additionalDirectories`
 - Removes or reorders a rule, or edits `CLAUDE.local.md` outside its markers
 - Overwrites a settings file it can't parse
 - Runs any git write — no commit, no `git rm --cached`

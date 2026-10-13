@@ -7,7 +7,7 @@
       "name": "mynrd-flow",
       "source": "./plugins/mynrd-flow",
       "description": "Personal dev workflow toolkit — planning, refine, and an agent-driven build loop with specialist implementation agents, plus /mynrd-help with a grounded knowledge base",
-      "version": "1.4.0"
+      "version": "1.4.1"
     }
   ]
 }

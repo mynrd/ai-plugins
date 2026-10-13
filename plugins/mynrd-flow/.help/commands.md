@@ -15,7 +15,7 @@ For each command:
 
 - **Arg:** `[check]` - optional. With no arg it checks, shows what would change, asks once, and writes. `check` reports only.
 - **Writes files?** `.claude/settings.local.json` (permission rules), `CLAUDE.local.md` (a managed rules block), and `.gitignore` entries for both plus `.work/`. All personal, all git-ignored.
-- **What it does:** Per-project setup so `/mynrd-dispatch` runs without permission prompts. Adds `Bash`, `PowerShell`, `Edit`, `Write`, `WebFetch` to `permissions.allow` and `git push` to `permissions.deny`, and writes the default rules for planning, building, git, and verification - plus the repo's detected unit / UI test commands - into `CLAUDE.local.md` between `<!-- mynrd-flow:start -->` and `<!-- mynrd-flow:end -->`.
+- **What it does:** Per-project setup so `/mynrd-dispatch` runs without permission prompts. Adds `Bash`, `PowerShell`, `Edit`, `Write`, `WebFetch` to `permissions.allow` and `git push` to `permissions.deny`, adds the plugin's own directory to `permissions.additionalDirectories` (so reading `PROGRESS-SCHEMA.md` doesn't prompt), and writes the default rules for planning, building, git, and verification - plus the repo's detected unit / UI test commands - into `CLAUDE.local.md` between `<!-- mynrd-flow:start -->` and `<!-- mynrd-flow:end -->`.
 - **Notes:**
   - **It merges, never overwrites.** Existing settings keys and rules stay as they are; in `CLAUDE.local.md` only the text between the markers is replaced. Safe to re-run after a plugin update.
   - **One confirmation, always.** It lists the exact rules before writing - the allowlist lets every later session in the project run commands and edit files without asking.

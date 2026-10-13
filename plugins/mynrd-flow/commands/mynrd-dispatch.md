@@ -45,7 +45,7 @@ The only full stop before the plan is finished is a **real blocker** — a decis
 | Given | Meaning |
 | --- | --- |
 | *(empty)* | Resolve the work folder: the slug in the branch (`feature/e2e-standard` → `.work/*-e2e-standard/`), else the single `.work/*/` folder whose `progress.json` has an unfinished `workflow[build]`. |
-| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `PROGRESS-SCHEMA.md` § Folder. |
+| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `${CLAUDE_PLUGIN_ROOT}/PROGRESS-SCHEMA.md` § Folder. |
 | a path to a `.work/` folder | Use that folder. |
 | a path ending in `.md` | Use that file as the plan, and the `progress.json` beside it. |
 
@@ -88,7 +88,7 @@ Two things to check before doing anything else:
 
 ### Schema
 
-The full schema, folder rules, and status vocabularies are defined once, in `PROGRESS-SCHEMA.md` at the plugin root. Don't restate them and don't diverge from them. The fields **this command owns** look like this mid-loop:
+The full schema, folder rules, and status vocabularies are defined once, in `${CLAUDE_PLUGIN_ROOT}/PROGRESS-SCHEMA.md`. Read that exact path with the Read tool — never search for it (`find`, `ls ~/.claude`, a glob): the path is already resolved, and a search outside the project triggers a permission prompt. Don't restate them and don't diverge from them. The fields **this command owns** look like this mid-loop:
 
 ```json
 {

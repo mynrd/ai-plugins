@@ -16,7 +16,7 @@ The last write of the workflow. `/mynrd-dispatch` ends with *"Development is don
 | Given | Meaning |
 | --- | --- |
 | *(empty)* | Find the candidates and ask which (below). |
-| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `PROGRESS-SCHEMA.md` § Folder. |
+| `<slug>` | Use `.work/*-<slug>/` — suffix match, per `${CLAUDE_PLUGIN_ROOT}/PROGRESS-SCHEMA.md` § Folder. Read that exact path with the Read tool; never search for it. |
 | a path to a `.work/` folder | Use that folder. |
 | path or slug, then free text | The folder as above; everything after it is the **note** — one line on what was checked, stored verbatim. Example: `/mynrd-verified e2e-standard ran the playwright suite against a real seed, commits squashed and pushed`. |
 

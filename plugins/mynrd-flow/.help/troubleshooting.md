@@ -54,6 +54,10 @@ Deliberate. The loop never edits a test to make it pass. If the test itself is t
 
 That's your machine's Bash permission, not the plugin. Run `/mynrd-init` once in the repo - it adds the allow rules to `.claude/settings.local.json` - then restart Claude Code. Still prompting after that means an `ask` or `deny` rule of your own covers the command; `/mynrd-init check` names it.
 
+### "Reads outside the working directories are blocked" when a command starts
+
+You have `permissions.blockReadsOutsideWorkingDirectories` on, and the command is opening the plugin's own `PROGRESS-SCHEMA.md`, which lives under `~/.claude/plugins/`. Run `/mynrd-init` again - it adds the plugin directory to `permissions.additionalDirectories` in `.claude/settings.local.json` - then restart Claude Code.
+
 ### The dev server the loop started is still running
 
 Shouldn't happen - anything the loop started itself it kills, process tree and all, before it reports. If something already answered on the port when the run began, the loop used it and left it alone on purpose; that one was yours. Kill it yourself if you didn't mean to leave it up.
