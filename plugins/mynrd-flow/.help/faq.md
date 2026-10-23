@@ -67,7 +67,7 @@ No. One invocation = one `.work/` folder = one plan. Run it once per piece of wo
 
 ### "Which agent builds what?"
 
-`/mynrd-dispatch` picks per task: `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX). You don't choose - the plan's file hints and the AC decide. All five ship inside the plugin.
+`/mynrd-dispatch` picks per task: `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX), `mynrd-docs-writer` (docs). You don't choose - the plan's file hints and the AC decide. All six ship inside the plugin.
 
 ### "Can the agents commit their own work?"
 

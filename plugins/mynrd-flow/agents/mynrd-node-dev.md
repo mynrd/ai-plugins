@@ -2,7 +2,7 @@
 name: mynrd-node-dev
 description: Node.js / TypeScript implementation agent for the mynrd-flow plugin's /mynrd-dispatch build loop. Use for the Node slice of planned work - Express/Fastify/Nest APIs, workers, streams, CLIs, libraries, build tooling, npm packages. Deep on async correctness, the ESM/CJS module system, runtime-vs-type boundaries, performance, and Node-specific security. Implements exactly the acceptance criteria it is handed, writes the tests that cover them, and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
-model: opus
+model: sonnet
 effort: medium
 ---
 

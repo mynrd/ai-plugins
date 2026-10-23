@@ -62,7 +62,7 @@ The non-date part of the folder name under `.work/` (`.work/<YYYY-MM-DD>-<slug>/
 
 ### Specialist agent
 
-One of the five implementation agents shipped in the plugin: `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX). Each implements exactly the ACs it is handed, writes the tests that cover them, and returns a structured report that `/mynrd-dispatch` transcribes into `progress.json`. Agents never run git and never edit `progress.json` or `PLAN.md`.
+One of the six agents shipped in the plugin: `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX), `mynrd-docs-writer` (plan drafts and docs). Each implements exactly the ACs it is handed, writes the tests that cover them, and returns a structured report that `/mynrd-dispatch` transcribes into `progress.json`. Agents never run git and never edit `progress.json` or `PLAN.md`.
 
 ### Test tiers
 

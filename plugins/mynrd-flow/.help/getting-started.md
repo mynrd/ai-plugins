@@ -11,7 +11,7 @@ claude plugin marketplace add https://github.com/mynrd/ai-plugins.git
 claude plugin install mynrd-flow@mynrd-ai-plugins
 ```
 
-**No env vars, no sign-in.** The five specialist agents ship inside the plugin.
+**No env vars, no sign-in.** The six specialist agents ship inside the plugin.
 
 Then, once per project:
 
@@ -87,6 +87,6 @@ If you're not sure what to read, type `/mynrd-help` and ask your question direct
 
 - **Everything is local.** No command talks to any external service. State lives in `.work/` (gitignored), plans live in `PLAN.md`, and the only side effects are file edits and local commits.
 - **Nothing builds without a plan.** Ask to "just build it" with no `PLAN.md` on disk and `/mynrd-dispatch` declines and points you at `/mynrd-plan` - a discussion has no acceptance criteria, so there'd be no definition of done.
-- **The specialist agents are on rails.** `mynrd-backend-dev`, `mynrd-front-dev`, `mynrd-node-dev`, `mynrd-python-dev`, and `mynrd-designer` implement exactly the ACs they're handed. They never run git and never edit `progress.json` or `PLAN.md` - that bookkeeping belongs to `/mynrd-dispatch`.
+- **The specialist agents are on rails.** `mynrd-backend-dev`, `mynrd-front-dev`, `mynrd-node-dev`, `mynrd-python-dev`, `mynrd-designer`, and `mynrd-docs-writer` implement exactly the ACs they're handed. They never run git and never edit `progress.json` or `PLAN.md` - that bookkeeping belongs to `/mynrd-dispatch`.
 - **Dispatch commits, and only commits.** Never pushes, never amends, never branches. The commits are yours to squash or drop before you push.
 - **`/mynrd-refine` and `/mynrd-help` write nothing.** Run them anytime.

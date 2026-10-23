@@ -63,7 +63,7 @@ An AC stuck at `implemented` is a coverage gap and gets reported as one, never c
 | `/mynrd-dispatch` | Everything from there - **during the build, only the dispatch command writes this file** |
 | `/mynrd-verified` | The last write, on your say-so only: `human-verification: done`, `verifiedAt` + optional note, `status: verified` |
 
-**The specialist agents never touch it.** `mynrd-backend-dev`, `mynrd-front-dev`, `mynrd-node-dev`, `mynrd-python-dev`, and `mynrd-designer` return a structured report of what they implemented and which tests they wrote; `/mynrd-dispatch` transcribes that into `progress.json` itself. The same rule covers `PLAN.md` - agents read it, never edit it.
+**The specialist agents never touch it.** `mynrd-backend-dev`, `mynrd-front-dev`, `mynrd-node-dev`, `mynrd-python-dev`, `mynrd-designer`, and `mynrd-docs-writer` return a structured report of what they implemented and which tests they wrote; `/mynrd-dispatch` transcribes that into `progress.json` itself. The same rule covers `PLAN.md` - agents read it, never edit it.
 
 `/mynrd-dispatch` also **never creates** the file. No `progress.json` beside the plan means the workflow never started - run `/mynrd-plan`.
 

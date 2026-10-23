@@ -220,14 +220,15 @@ Either way, mirror it with `TodoWrite` so progress is visible live, and order by
 | Node / TypeScript services, CLIs, tooling | `mynrd-node-dev` |
 | Python services, scripts, data | `mynrd-python-dev` |
 | Visual design, component styling, design systems | `mynrd-designer` |
+| Docs - README, help pages, runbooks, decision records, doc comments | `mynrd-docs-writer` |
 | Small obvious single-file edits | do it yourself |
 
-All five ship with the plugin (`agents/`), so they exist on every machine that installed it — never dispatch to an unprefixed `backend-dev` / `designer` / etc., which are whatever that developer happens to have in their own `~/.claude/agents` and are absent on a fresh install.
+All six ship with the plugin (`agents/`), so they exist on every machine that installed it — never dispatch to an unprefixed `backend-dev` / `designer` / etc., which are whatever that developer happens to have in their own `~/.claude/agents` and are absent on a fresh install. A project's own agent under `.claude/agents/` wins over the table when it is compatible: it covers the work's stack and ends with a `## Result` block you can transcribe. Otherwise use the `mynrd-*` agent and say in one line why the project agent was skipped.
 
 - **Independent tasks go out in parallel**, one message. Tasks touching the same files run sequentially — two agents in one file is a merge conflict you pay for later.
 - **Hand each agent the plan text it needs** — its AC items, the relevant notes, the file paths. An agent rediscovering the plan wastes a context.
 - **Update `progress.json` around each dispatch:** when the task goes out, its `tasks[]` entry → `in_progress` with `startedAt` stamped and its AC → `in_progress`; when the agent returns, AC → `implemented` with `implementedIn` filled. Never `pass` here, and `endedAt` waits for `built` / `blocked` / `committed`.
-- **Each agent ends with a `## Result` block** — AC coverage, files changed, tests added with the AC each covers, test command, blockers. Transcribe it; don't re-derive it by reading the diff. The agents report `implemented` or `blocked` and never `pass`, because only Step 6 promotes an AC to `pass`.
+- **Each agent ends with a `## Result` block** — AC coverage, files changed, tests added with the AC each covers, test command, blockers. `mynrd-docs-writer` reports a `Verified` line instead of tests; its ACs carry `evidence: review`, so you read what that line names before promoting. Transcribe it; don't re-derive it by reading the diff. The agents report `implemented` or `blocked` and never `pass`, because only Step 6 promotes an AC to `pass`.
 
 **Guide the agent; don't hand it the AC and hope.** Each dispatch message carries: the exact AC text it owns, the implementation notes and file paths from the plan, the conventions it must follow (the patterns already in the repo, the test project it writes into), what is explicitly out of its slice, and — when a live check is part of the AC — the URL the stack is already answering on (Step 5b), so it verifies instead of reporting infra as a blocker. An agent that has to rediscover the plan spends its context on rediscovery.
 

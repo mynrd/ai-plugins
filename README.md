@@ -8,7 +8,7 @@ Everything here runs fully local: no issue tracker, no external services, no cre
 
 ### mynrd-flow
 
-A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - six slash commands and five specialist implementation agents.
+A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - six slash commands and six specialist agents.
 
 | Command | What it does |
 |---|---|
@@ -26,6 +26,7 @@ A personal dev workflow toolkit that takes a raw request from "someone asked for
 - `mynrd-node-dev` - Node.js / TypeScript: APIs, workers, CLIs, libraries, tooling
 - `mynrd-python-dev` - Python: FastAPI/Django/Flask, CLIs, ETL, asyncio, MCP servers
 - `mynrd-designer` - UI/UX and visual design, production markup/styles, accessibility
+- `mynrd-docs-writer` - plan drafts for `/mynrd-plan`, and docs: README, help pages, runbooks, decision records, doc comments
 
 Agents implement exactly the acceptance criteria they are handed. They never run git and never edit `progress.json` or `PLAN.md` - only the dispatch loop does.
 
@@ -62,7 +63,7 @@ Dispatch ends at "development is done - try it now" and hands verification to yo
 .cursor-plugin/marketplace.json   Cursor marketplace manifest
 plugins/mynrd-flow/               The plugin
   commands/                       The six slash commands
-  agents/                         The five specialist agents
+  agents/                         The six specialist agents
   .help/                          Knowledge base read by /mynrd-help
   PROGRESS-SCHEMA.md              The progress.json schema every command reads
 ```

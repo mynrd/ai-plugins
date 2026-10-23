@@ -224,6 +224,8 @@ the file worth reading at build time.]
 - UI: <yes|no> — <framework, e.g. ng test>
 ```
 
+**Drafting `Implementation notes` for a large or unfamiliar codebase:** hand the restated request, the AC list, and the findings to `mynrd-docs-writer` (`agents/`, Caller A) and let it read the repo and return the draft. It returns text only; you still write `PLAN.md`. Skip it when the discussion already produced the notes.
+
 Skip sections that don't apply (a bug uses Steps to Reproduce / Actual / Expected / Impact / Environment instead of "What needs to happen"). Never leave `Implementation notes` empty — if the discussion produced none, write what you'd tell the next dev about where to start.
 
 **The `Testing` section is what `/mynrd-dispatch` reads to decide which test tiers its build loop runs.** Fill it from the discussion and what the repo actually has — don't ask a question for it. Defaults: Unit `yes` for backend work, UI `yes` for frontend work. **Those two tiers are all there is** — don't add an `E2E:` row or name a browser suite here; `/mynrd-dispatch` runs neither.

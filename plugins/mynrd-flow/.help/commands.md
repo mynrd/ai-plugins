@@ -58,7 +58,7 @@ For each command:
   2. Opens `progress.json` beside it. **It never creates that file** - `/mynrd-plan` does. It resumes from the first step that isn't `done` or `skipped` instead of starting over.
   3. Resolves the test tiers from the plan's `## Testing` section and checks the commands actually exist in the repo.
   4. Decomposes the AC into an ordered task list.
-  5. Dispatches each task to the right specialist agent - `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX) - handing each the AC text, the plan notes, and the file paths; independent tasks run in parallel. These five ship inside the plugin, so there's nothing to set up.
+  5. Dispatches each task to the right specialist agent - `mynrd-backend-dev` (.NET / backend), `mynrd-front-dev` (Angular / React), `mynrd-node-dev` (Node / TypeScript), `mynrd-python-dev` (Python), `mynrd-designer` (UI/UX), `mynrd-docs-writer` (docs) - handing each the AC text, the plan notes, and the file paths; independent tasks run in parallel. These six ship inside the plugin, so there's nothing to set up.
   6. **Starts the local stack when a check needs it** - the backend host, the UI dev server - without asking you.
   7. Runs the tiers in order - unit → UI - stopping at the first failure, recording every test case and its status.
   8. Loops: diagnose, fix, re-run, then straight on to the next unfinished AC. **Two attempts per distinct failure**, after which that AC is marked blocked and the loop continues with the rest.

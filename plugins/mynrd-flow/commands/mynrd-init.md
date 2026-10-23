@@ -1,6 +1,6 @@
 ---
 name: mynrd-init
-description: Check a project's setup for the mynrd-flow workflow and fix what's missing — `.claude/settings.local.json` permissions so /mynrd-plan and /mynrd-dispatch run without permission prompts, a `CLAUDE.local.md` block holding the default rules for planning and building, and the `.gitignore` entries that keep all of it local. Safe to re-run; it merges, never overwrites.
+description: Check a project's setup for the mynrd-flow workflow and fix what's missing — `.claude/settings.local.json` permissions so /mynrd-plan and /mynrd-dispatch run without permission prompts, a `CLAUDE.local.md` block holding the default rules for planning, building, and which agents and models do the work, and the `.gitignore` entries that keep all of it local. Safe to re-run; it merges, never overwrites.
 ---
 
 # /mynrd-init
@@ -104,6 +104,11 @@ Building
 - Nothing builds without a plan on disk. Asked to "just build it" with no `PLAN.md`, point at `/mynrd-plan`.
 - Building goes through `/mynrd-dispatch`, which delegates to the `mynrd-*` specialist agents and runs to completion without check-ins. Don't stop to ask "shall I continue" — stop only for a real blocker: new scope, a missing credential, a schema decision.
 - Never edit a test to make it pass.
+
+Agents and models
+- A task that needs a subagent uses this project's own agents under `.claude/agents/` when one is compatible: it covers the work's stack and returns a `## Result` block with AC coverage, files changed, and tests added, so `/mynrd-dispatch` can transcribe it. No project agent, or none compatible, falls back to the `mynrd-*` agents shipped with mynrd-flow (`mynrd-backend-dev`, `mynrd-front-dev`, `mynrd-node-dev`, `mynrd-python-dev`, `mynrd-designer`, `mynrd-docs-writer`). Never an unprefixed `backend-dev` / `designer` / `general-purpose` from `~/.claude/agents` for implementation work.
+- Development and any other working subagent (code, tests, fixes, refactors) runs on `sonnet`, the model set in its agent file. Never pass a `model` override that raises it to `opus` or `fable`. `mynrd-docs-writer` runs on `opus` for plan drafts and docs.
+- The main session model (`fable` or whatever is selected) is for planning, brainstorming, and `/mynrd-plan` only. It never implements source changes itself, beyond the trivial single-file edits `/mynrd-dispatch` makes without an agent.
 
 Git
 - Commit only as `/mynrd-dispatch` does: one commit per green task, files staged by name, never `git add -A`.
