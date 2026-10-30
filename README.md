@@ -1,6 +1,6 @@
 # mynrd-ai-plugins
 
-Personal AI plugin marketplace for [Claude Code](https://claude.com/claude-code) and Cursor.
+Personal AI plugin marketplace for [Claude Code](https://claude.com/claude-code), Cursor, and Codex.
 
 Everything here runs fully local: no issue tracker, no external services, no credentials, no MCP server. The only things the plugins ever write are files inside your repo (`.work/` state plus the source edits you asked for) and local git commits.
 
@@ -8,7 +8,7 @@ Everything here runs fully local: no issue tracker, no external services, no cre
 
 ### mynrd-flow
 
-A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - six slash commands and six specialist agents.
+A personal dev workflow toolkit that takes a raw request from "someone asked for this" to "built, tested, and verified by a human" - six workflows and six specialist profiles. Claude Code and Cursor use slash commands; Codex uses skills with the same names (for example, `$mynrd-plan`).
 
 | Command | What it does |
 |---|---|
@@ -41,7 +41,18 @@ claude plugin install mynrd-flow@mynrd-ai-plugins
 
 Cursor: the repo ships a `.cursor-plugin/marketplace.json` manifest; add this repo as a plugin source the same way.
 
-No environment variables, no MCP server. Run `/mynrd-init` once per project to skip the permission prompts.
+Codex (current CLI with plugin support):
+
+```text
+codex plugin marketplace add https://github.com/mynrd/ai-plugins.git
+codex plugin add mynrd-flow@mynrd-ai-plugins
+```
+
+For an unpublished local checkout, run `codex plugin marketplace add .` from this repository root, then the same `codex plugin add` command. Open a new Codex session in your target project. Desktop users can install/enable `mynrd-flow` from the `mynrd AI Plugins` source in the Plugins Directory. Clients without `plugin add` can use the desktop flow or update Codex.
+
+No environment variables or MCP server are needed. Claude's `/mynrd-init` configures its local allowlist. Codex's `$mynrd-init` instead merges workflow defaults into the target project's `AGENTS.md` and ignores `.work/`; `$mynrd-init check` only reports. It preserves existing instructions and test commands and does not change permission or model settings. `AGENTS.md` may be shared with your team; it is not automatically git-ignored.
+
+Codex uses the bundled specialist profiles with available delegation tools, or executes slices sequentially when delegation is unavailable. The profiles do not register native Codex agent types. See [Codex setup and troubleshooting](plugins/mynrd-flow/.help/codex.md).
 
 ## Workflow
 
@@ -61,12 +72,23 @@ Dispatch ends at "development is done - try it now" and hands verification to yo
 ```
 .claude-plugin/marketplace.json   Claude Code marketplace manifest
 .cursor-plugin/marketplace.json   Cursor marketplace manifest
+.agents/plugins/marketplace.json Codex marketplace manifest
 plugins/mynrd-flow/               The plugin
+  plugin.json                     Portable plugin manifest
+  .codex-plugin/plugin.json       Codex compatibility manifest
+  skills/                         Six skill entry points
+  adapters/codex.md               Codex tool, path, and agent translations
   commands/                       The six slash commands
   agents/                         The six specialist agents
   .help/                          Knowledge base read by /mynrd-help
   PROGRESS-SCHEMA.md              The progress.json schema every command reads
 ```
+
+## Maintainer checks
+
+Run `python scripts/validate_plugins.py` to check catalog paths, aligned versions, command/skill coverage, and bundled skill references. All client manifests use the same release version. The shared `commands/`, `agents/`, and `PROGRESS-SCHEMA.md` remain the workflow sources; keep Codex differences in `adapters/codex.md` and the setup skill.
+
+The skill wrappers also route back to the existing native command if a Claude/Cursor client discovers them, so both entry paths use the same workflow. Validate installation in each client before publishing a release. Packaging follows the [official OpenAI plugin format](https://developers.openai.com/plugins/build/plugins).
 
 ## License
 

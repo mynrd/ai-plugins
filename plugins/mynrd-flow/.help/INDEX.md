@@ -10,6 +10,7 @@ This is the table of contents that `/mynrd-help` reads first. Every entry maps a
 
 | Topic | File | When to load |
 |---|---|---|
+| Codex installation, skill invocation, setup, permissions, and specialist execution | [codex.md](codex.md) | Always load first for Codex-specific questions; its client behavior takes precedence over Claude examples below |
 | First-time orientation, install, "what is this", "where do I start" | [getting-started.md](getting-started.md) | The user is new and asks for a tour, how to install, or what to do first |
 | Project setup, permission prompts, `settings.local.json`, `CLAUDE.local.md` | [commands.md](commands.md) (`/mynrd-init`) | The user asks how to set a project up, why dispatch keeps prompting, or what the rules block is |
 | What a specific command does, its arguments, its behavior | [commands.md](commands.md) | The user asks about a specific `/mynrd-*` command or how to pick one |

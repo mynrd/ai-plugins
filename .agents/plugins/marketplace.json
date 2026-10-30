@@ -1,0 +1,12 @@
+{
+  "name": "mynrd-ai-plugins",
+  "interface": { "displayName": "mynrd AI Plugins" },
+  "plugins": [
+    {
+      "name": "mynrd-flow",
+      "source": { "source": "local", "path": "./plugins/mynrd-flow" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}
