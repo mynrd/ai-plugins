@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mynrd-flow",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Local development workflows for Claude Code, Cursor, and Codex: plan, refine, build with specialist guidance, and record human verification.",
   "author": { "name": "mynrd" },
   "license": "MIT",

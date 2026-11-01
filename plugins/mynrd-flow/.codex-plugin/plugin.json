@@ -1,6 +1,6 @@
 {
   "name": "mynrd-flow",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Local planning, implementation, and human-verification workflows with six specialist profiles.",
   "author": { "name": "mynrd" },
   "skills": "./skills/"

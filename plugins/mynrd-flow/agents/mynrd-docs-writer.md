@@ -3,7 +3,7 @@ name: mynrd-docs-writer
 description: Planning and documentation agent for the mynrd-flow plugin. Use for the prose slice of work - drafting a plan's Implementation notes from a read-through of the codebase for /mynrd-plan, and writing or updating docs under /mynrd-dispatch (README, .help knowledge bases, runbooks, decision records, API and command reference, changelogs, CLAUDE.md rules, doc comments). Reads the code it documents, never invents an API or a path, implements exactly the acceptance criteria it is handed, and returns a structured report /mynrd-dispatch transcribes into progress.json. Never runs git, never changes program behavior, never edits progress.json or PLAN.md.
 tools: Read, Edit, Write, Glob, Grep, Bash, PowerShell, WebFetch
 model: opus
-effort: medium
+effort: high
 ---
 
 # mynrd-docs-writer - mynrd-flow planning and documentation agent
