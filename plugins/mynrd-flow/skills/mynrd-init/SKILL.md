@@ -5,16 +5,17 @@ description: Set up or check mynrd-flow defaults in the current Codex project, p
 
 # mynrd-init
 
-In Claude Code or Cursor, read and follow [the existing setup command](../../commands/mynrd-init.md) using that client's native behavior. The instructions below apply to Codex only.
+In Claude Code, read and follow [the existing setup command](../../commands/mynrd-init.md) using that client's native behavior. The instructions below apply to Codex only.
 
 Read [the Codex adapter](../../adapters/codex.md). This setup is optional; every other skill works without it.
 
 1. Resolve the target repository root with `git rev-parse --show-toplevel`, falling back to the current directory. State the path. Read its `AGENTS.md`, any `AGENTS.override.md`, and `.gitignore` if present. Discover unit/UI test commands from project files without running tests.
-2. With the argument `check`, report which items below are present, missing, or need attention, then stop without writes. An unknown setup argument gets a usage explanation, not a write.
+2. With the argument `check`, report which items below are present, missing, or need attention. Run the bundled [agent installer](../../scripts/install_codex_agents.py) with `--project <target-root> --check`; this is read-only, and a nonzero exit means attention is needed. Then stop without writes. An unknown setup argument gets a usage explanation, not a write.
 3. With no argument, merge the managed block below into `AGENTS.md`: create the file if absent, append if neither marker exists, or replace the one complete matching block. Preserve all text outside it. Preserve user-customized test commands; fill only empty or `none found` values. Duplicate, reversed, or unmatched markers require attention: do not rewrite that file.
 4. An existing nonempty `AGENTS.override.md` takes precedence over `AGENTS.md` in Codex. If present, report that setup cannot ensure the defaults are loaded, leave both instruction files unchanged, and explain that the user can choose where to merge the block. Do not create an override file, since it could hide the project's existing instructions.
 5. In a git repository, ensure `.gitignore` covers `.work/`, appending the entry only when needed. Do not ignore `AGENTS.md` automatically: it is a normal project instruction file that may be shared with the team. Outside git, skip the ignore step. Never commit, untrack files, or modify global configuration.
-6. Report each item's status (`ok`, `created`, `updated`, `skipped`, or `needs attention`), actual test commands discovered, and any write failures. Do not start planning or building. When instructions changed, recommend a new Codex session to load them.
+6. With no argument, run the bundled [agent installer](../../scripts/install_codex_agents.py) using Python 3.11+ and `--project <target-root>`. Resolve the script from this installed skill's plugin root. It installs six native TOML definitions into `.codex/agents/` and records managed hashes there. It preserves unrelated agents and refuses to overwrite locally edited or conflicting definitions. Report conflicts or missing Python without working around them. Never use `--user` implicitly. Project definitions may be committed with the project; do not ignore them automatically.
+7. Report each item's status (`ok`, `created`, `updated`, `skipped`, or `needs attention`), actual test commands discovered, agent installation results, and any write failures. Do not start planning or building. Recommend a new Codex session to discover changed instructions and agents.
 
 Managed block (substitute discovered test commands):
 

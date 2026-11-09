@@ -1,6 +1,6 @@
 ---
 name: mynrd-plan
-description: Discuss a request — a pasted chat blob, a bug report, your own observation — and produce a local plan: PLAN.md and progress.json in a `.work/` folder. The entry point of the workflow. No tracker, no approval gate; everything stays on this machine.
+description: "Discuss a request — a pasted chat blob, a bug report, your own observation — and produce a local plan: PLAN.md and progress.json in a `.work/` folder. The entry point of the workflow. No tracker, no approval gate; everything stays on this machine."
 ---
 
 # /mynrd-plan

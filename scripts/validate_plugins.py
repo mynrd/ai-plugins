@@ -1,11 +1,14 @@
 """Validate the repository's plugin catalogs and packaged skill references.
 
-Run with Python 3.10+ from any directory. No third-party dependencies required.
+Run with Python 3.11+ from any directory. No third-party dependencies required.
 """
 
 import json
 import re
+import tomllib
 from pathlib import Path
+
+from generate_codex_agents import expected_agents
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +31,7 @@ def main():
     portable = read_json(PLUGIN / "plugin.json")
     assert portable["name"] == "mynrd-flow"
     assert portable["$schema"] == "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
-    for client in ("claude", "cursor", "codex"):
+    for client in ("claude", "codex"):
         manifest = read_json(PLUGIN / f".{client}-plugin" / "plugin.json")
         assert (manifest["name"], manifest["version"]) == (portable["name"], portable["version"])
         if client == "codex":
@@ -69,7 +72,15 @@ def main():
             links += 1
     profiles = list((PLUGIN / "agents").glob("mynrd-*.md"))
     assert len(profiles) == 6
-    print(f"Validated 3 catalogs, 4 manifests, {len(skills)} skills, {links} skill links, and 6 specialist profiles.")
+    expected = expected_agents()
+    assert {p.name for p in (PLUGIN / "codex-agents").glob("*.toml")} == set(expected)
+    for name, content in expected.items():
+        path = PLUGIN / "codex-agents" / name
+        assert path.read_text(encoding="utf-8") == content, f"Regenerate {path}"
+        agent = tomllib.loads(content)
+        assert set(agent) == {"name", "description", "developer_instructions"}, f"Unexpected model/permission override: {path}"
+        assert "## Result" in agent["developer_instructions"]
+    print(f"Validated 2 catalogs, 3 manifests, {len(skills)} skills, {links} skill links, 6 Claude profiles, and 6 native Codex agents.")
 
 
 if __name__ == "__main__":

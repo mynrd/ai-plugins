@@ -21,12 +21,12 @@ Read this before a shared workflow in `commands/` or a specialist profile in `ag
 
 ## Specialist work
 
-The Markdown files in `agents/` are reusable profiles; installing this plugin does not automatically register six Codex agent types. Ignore their Claude frontmatter `tools`, `model`, and `effort` settings. Do not pass `sonnet`, `opus`, or `fable` to Codex or alter the user's model configuration.
+The Markdown files in `agents/` are the canonical Claude profiles. Matching native Codex definitions are generated into `codex-agents/*.toml`. Register them with the bundled `scripts/install_codex_agents.py --project <target-root>` (or `--user` when explicitly requested). `$mynrd-init` installs project agents; installing the plugin alone supplies skills and the installer. Ignore Claude frontmatter `tools`, `model`, and `effort`. Native definitions inherit the parent model and reasoning; never pass `sonnet`, `opus`, or `fable` to Codex.
 
 For planning drafts or dispatch implementation:
 
 1. Choose the profile from the shared dispatch table. Read its body and apply these tool/model translations.
-2. If delegation is available and permitted, use a compatible agent type actually exposed by the runtime. A configured project specialist that covers the stack and returns the required `## Result` takes priority; otherwise use an available general worker with the selected bundled profile supplied in its task. Do not assume `.claude/agents/` is a Codex agent registry. Inherit the configured model unless the user or applicable project instructions explicitly choose another supported model.
+2. If delegation is available and permitted, prefer the matching registered `mynrd-*` custom agent exposed by the runtime, or a project specialist covering the stack and returning `## Result`. Use the runtime's supported named-agent selection; never invent an `agent_type` argument on a tool that lacks it. If named selection is unavailable, pass the selected bundled profile and adapter to an available worker and report that fallback. Do not assume `.claude/agents/` is a Codex registry. Inherit the configured model unless the user or applicable project instructions explicitly choose another supported model.
 3. Give the worker the exact AC, relevant plan notes, file ownership, conventions, exclusions, and any running service URL. Include the resolved profile path and this adapter, or their relevant contents if the worker cannot read them. Tell it that other agents may be working in the repository and that it must preserve their edits.
 4. Workers do not write `.work/` state or run git mutations. Require the shared `## Result` report. Only the coordinator records progress, evaluates evidence, and stages/commits eligible work. Run overlapping ownership sequentially; parallelize only independent slices within runtime limits.
 5. If delegation is unavailable or prohibited, say so once and execute slices sequentially in the current session using the same specialist guidance. Keep implementation, evidence evaluation, and state updates as distinct steps. Do not claim a subagent ran. Record the execution mode honestly in `runs[].notes` and leave `runs[].agents` empty when none ran.
@@ -35,6 +35,6 @@ The planning skill may use the docs profile for a read-only draft; it still stop
 
 ## Setup and help
 
-For `$mynrd-init`, use the Codex skill's own setup instructions instead of `commands/mynrd-init.md`. Codex setup merges a scoped defaults block into the target project's `AGENTS.md` and adds `.work/` to `.gitignore`; it does not write Claude settings or Codex global configuration.
+For `$mynrd-init`, use the Codex skill's own setup instructions instead of `commands/mynrd-init.md`. Codex setup merges a scoped defaults block into the target project's `AGENTS.md`, adds `.work/` to `.gitignore`, and installs native agents in `.codex/agents/`; it does not write Claude settings or Codex global configuration.
 
 For `$mynrd-help`, read `.help/INDEX.md` and `.help/codex.md` before other matched topics. Codex setup, invocation, agent selection, and permissions in that topic override Claude examples in the shared help. Preserve the read-only help boundary.

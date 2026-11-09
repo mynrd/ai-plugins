@@ -22,7 +22,7 @@ For each command:
   - **Pushing stays blocked.** The `deny` rule wins over the broad `Bash` allow. Remove those two lines yourself if you want to push from a Claude session.
   - **Restart Claude Code afterwards** - permissions are read when a session starts.
   - It never touches `.claude/settings.json`, `CLAUDE.md`, or `~/.claude/`, never sets `defaultMode` or `bypassPermissions`, and won't overwrite a settings file it can't parse.
-  - Claude Code only - Cursor doesn't read `settings.local.json`.
+  - Claude Code only. Codex setup uses the skill described in [codex.md](codex.md).
 
 ---
 

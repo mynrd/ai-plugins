@@ -1,6 +1,6 @@
 # Getting started
 
-You're using **mynrd-flow**, a personal workflow plugin for Claude Code, Cursor, and Codex - six workflows that take a raw request from "someone asked for this" to "built and tested", entirely on your machine. No external services, no boards, no plugin credentials. The only things it writes are files in your repo (`.work/` state, setup files, and the source edits you asked for) and local git commits.
+You're using **mynrd-flow**, a personal workflow plugin for Claude Code and Codex - six workflows that take a raw request from "someone asked for this" to "built and tested", entirely on your machine. No external services, no boards, no plugin credentials. The only things it writes are files in your repo (`.work/` state, setup files, and the source edits you asked for) and local git commits.
 
 **Codex users:** start with [Codex installation and usage](codex.md). Use `$mynrd-*` skills in place of the slash commands below. Codex setup writes an `AGENTS.md` block and preserves your existing permissions; the Claude allowlist setup below does not apply.
 
@@ -17,7 +17,7 @@ claude plugin install mynrd-flow@mynrd-ai-plugins
 
 **No env vars, no sign-in.** The six specialist agents ship inside the plugin.
 
-Cursor: add this repository as a plugin source using its `.cursor-plugin/marketplace.json`. Codex: follow [codex.md](codex.md).
+Codex: follow [codex.md](codex.md), including native agent registration.
 
 Then, once per project:
 
